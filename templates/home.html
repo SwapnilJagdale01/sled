@@ -1,0 +1,2386 @@
+{% extends "base_page.html" %}
+{% load staticfiles %}
+
+{% block styleBlock %}
+
+    <style>
+
+ .desc{
+     margin-left: 1px;
+     margin-right: 12px;
+ }
+
+.wrapper{
+  position: fixed;
+  top: 70px;
+  left: 0;
+  right: 0;
+  display: inline-block;
+  margin: auto;
+  width: 100px;
+  height: 20px;
+    z-index: 1;
+}
+
+#start-stop{
+  float: left;
+}
+
+#reset-lap{
+  float: right;
+}
+
+.tile{
+  border: none;
+  display: block;
+  border-radius: 0;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  -o-border-radius: 0;
+  -webkit-box-shadow: inset 0px 0px 1px #FFFFCC;
+  -moz-box-shadow: inset 0px 0px 1px #FFFFCC;
+  -o-box-shadow: inset 0px 0px 1px #FFFFCC;
+  box-shadow: inset 0px 0px 1px #FFFFCC;
+}
+
+.action-button{
+  cursor: pointer;
+  color: white;
+  font-size: 1em;
+  padding: 5px;
+  margin: 0;
+  margin-top: 10px;
+  width: 70px;
+}
+
+.action-button:hover{
+  outline: #999999 solid 1px;
+}
+
+.start-button{
+  background-color: #60a917;
+}
+
+.lap-button{
+  background-color: #4390df;
+}
+
+.reset-button, .stop-button{
+  background-color: #9a1616;
+}
+
+#watch-dial{
+  background-color: #333333;
+  font-family: monospace;
+  text-align: center;
+  color: white;
+  padding: 2px;
+}
+
+#laps{
+  margin-top: 70px;
+  height: 400px;
+  overflow-y: auto;
+  color: white;
+  list-style: none;
+  padding: 0px;
+}
+
+#laps > li{
+  border-color: white;
+  width: 100%;
+  display: inline-block;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  text-align: center;
+  font-family: monospace;
+  font-size: 1.5em;
+}
+
+/*Cust Css*/
+.page-sidebar-closed .page-content-wrapper .page-content {
+    margin-left: 0px !important;
+    margin-top: -5em !important;
+}
+
+.page-header.navbar .page-top {
+    visibility: collapse !important;
+}
+
+/*page css cust*/
+.dashboard-stat.dashboard-stat-v2 .visual {
+    padding-top: 0;
+    margin-bottom: 0;
+}
+
+.dashboard-stat {
+    margin-bottom: 0;
+}
+
+.page-title{
+    display: none;
+}
+
+.table {
+    width: 0;
+    margin-bottom: 0;
+}
+
+.portlet.light {
+    padding: 0px 7px 7px 7px;
+    background-color: #fff;
+    width: 15em;
+    margin-bottom: 0;
+}
+
+.wrapper {
+    top: 22px;
+}
+
+.number {
+    display: none;
+}
+
+.dashboard-stat .details .desc{
+    font-weight: 1000;
+}
+
+.dashboard-stat {
+    height: 4em;
+}
+
+.dashboard-stat .details {
+    position: absolute;
+    right: 6px;
+    padding-right: 0px;
+}
+.page-header.navbar.navbar-fixed-top{
+    display: none;
+    }
+
+.page-header-inner {
+    display: none;
+}
+
+    </style>
+
+
+{% endblock %}
+
+{% block ScriptBlock %}
+
+
+<script src="{% static 'js/stopwatch.js'%}" type="text/javascript"></script>
+
+<script src="https://www.gstatic.com/firebasejs/4.9.1/firebase.js"></script>
+<script type="text/javascript">
+	
+	var config = {
+				    apiKey: "AIzaSyBsMQlGknjN27naDZFz5SBgWY2XR7w-n0U",
+				    authDomain: "traineaux-fdf39.firebaseapp.com",
+				    databaseURL: "https://traineaux-fdf39.firebaseio.com",
+				    projectId: "traineaux-fdf39",
+				    storageBucket: "traineaux-fdf39.appspot.com",
+				    messagingSenderId: "857150252986"
+				  };
+				  firebase.initializeApp(config);
+</script>
+<script src="{% static 'js/traineau.js'%}" type="text/javascript"></script>
+
+    <script>
+
+
+        window.onload = function () {
+            //YOUR JQUERY CODE
+            $(document).ready(function () {
+            		
+            	var newPostKey = firebase.database().ref().child("Session").push().key;
+				var directionId = {};
+				directionId["current"] = newPostKey;
+				firebase.database().ref().child("direction").update(directionId);
+				var state = {};
+				state["currentState"] = false;
+				var stateRef = firebase.database().ref("direction");
+				stateRef.update(state);
+
+				operations(newPostKey);
+
+                $("#setting").prop('disabled', false);
+                
+                var x = 50;
+                var y = 0;
+                var z = 0;
+                var final_prod_count = 0;
+
+                $('#labelFirst').text(x);
+                {#$('.labelSheet').text(y);#}
+                {#$('.labelCut').text(y);#}
+                {#$('.labelFold').text(z);#}
+                {#$('.labelProduct').text(final_prod_count);#}
+
+                {#$('#labelAssembly').text(final_prod_count);#}
+                {#$('.labelSkiFolding').text(final_prod_count);#}
+                {#$('.labelSkiPunching').text(final_prod_count);#}
+                {#$('.labelSeatFolding').text(final_prod_count);#}
+                $('#totalNc').text(final_prod_count);
+                $('#cycleTime').text(final_prod_count+'s');
+                $('#totalNcCost').text(final_prod_count);
+                $('#leadTime').text(final_prod_count+'s');
+
+                $('#sales').text(final_prod_count+'€');
+                $('#cost').text(final_prod_count+'€');
+                $('#unitRevenu').text(final_prod_count+'€');
+                $("#btnCut").show();
+
+                function validate(data){
+                    var flag = true;
+                    if (Number(data['StkL4']) == 0 || data['StkL4'] == '0') {
+
+                        flag = false;
+                    }
+
+                    if (Number(data['StkSKI2']) == 0 || data['StkSKI2'] == '0') {
+
+                        flag = false;
+                    }
+
+                    if (Number(data['StkSEAT']) == 0 || data['StkSEAT'] == '0') {
+
+                        flag = false;
+                    }
+
+                    return flag;
+                }
+
+
+                function init_data() {
+                    var url = '/get_initial_data/';
+                    $.ajax({
+                        data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+                        type: 'GET',
+                        url: url,
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+							$('#totalStack').text(data['totalStack']+'€');
+
+                            $('.labelSheet').text(data['StkL1']);
+                            $('.labelCut').text(data['StkL2']);
+                            $('.labelFold').text(data['StkL3']);
+                            $('.labelProduct').text(data['StkL4']);
+                            $('.labelSkiFolding').text(data['StkSKI1']);
+                            $('.labelSkiPunching').text(data['StkSKI2']);
+                            $('.labelSeatFolding').text(data['StkSEAT']);
+                            $('#labelAssembly').text(data['StkASS']);
+
+                            if(validate(data) == true){
+                                $('#btnAssembly').show();
+                                $('#disAssembly').hide();
+                            }else{
+                                $('#btnAssembly').hide();
+                                $('#disAssembly').show();
+                            }
+
+
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+                }
+
+                init_data();
+
+                $("#btnSheet").click(function () {
+
+                    wichButtonClick = 'sheetTime';
+
+                    if(!stopwatch.running()){
+                        stopwatch.start();
+                    }
+
+
+                    var url = '/prod_one/';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#sheetProd').text(data['L1Prod']);
+                            $('#sheetCost').text(data['L1Cost']+'€');
+
+                            $('#sheetTime').text(data['L1TC']+'s');
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            $('#totalStack').text(data['totalStack']+'€');
+
+
+                            if (data['StkL1'] > data['minStkL1'] && data['StkL1'] < data['maxStkL1']) {
+
+                                $('.labelSheet').text(data['StkL1']);
+                                $('#sheetIdYellow').hide();
+                                $('#sheetIdGreen').show();
+                                $('#sheetIdRed').hide();
+
+
+                            } else {
+
+                                $('.labelSheet').text(data['StkL1']);
+                                $('#sheetIdYellow').hide();
+                                $('#sheetIdGreen').hide();
+                                $('#sheetIdRed').show();
+
+                            }
+
+                            if (Number(data['StkL1']) > 0) {
+                                $('#btnCut').show();
+                                $('#disCut').hide();
+                            }
+
+                            var button = $('#reset-lap');
+                            button.click();
+
+
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+
+
+                });
+
+                $("#btnCut").click(function (e) {
+
+                    e.preventDefault();
+
+                    wichButtonClick = 'cutTime';
+
+                    if(!stopwatch.running()){
+                        stopwatch.start();
+                    }
+
+
+                    var url = '/prod_two/';
+                    $.ajax({
+                    
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            $('#totalStack').text(data['totalStack']+'€');
+
+                            $('#cutProd').text(data['L2Prod']);
+                            $('#cutCost').text(data['L2Cost']+'€');
+                            $('#cutTime').text(data['L2TC']+'s');
+
+                            if (data['StkL2'] > data['minStkL2'] && data['StkL2'] < data['maxStkL2']) {
+
+                                $('.labelCut').text(data['StkL2']);
+                                $('#cutIdYellow').hide();
+                                $('#cutIdGreen').show();
+                                $('#cutIdRed').hide();
+
+                            } else {
+
+                                $('.labelCut').text(data['StkL2']);
+                                $('#cutIdYellow').hide();
+                                $('#cutIdGreen').hide();
+                                $('#cutIdRed').show();
+
+                            }
+
+                            if (data['StkL1'] > data['minStkL1'] && data['StkL1'] < data['maxStkL1']) {
+
+                                $('.labelSheet').text(data['StkL1']);
+                                $('#sheetIdYellow').hide();
+                                $('#sheetIdGreen').show();
+                                $('#sheetIdRed').hide();
+
+                            } else {
+
+                                $('.labelSheet').text(data['StkL1']);
+                                $('#sheetIdYellow').hide();
+                                $('#sheetIdGreen').hide();
+                                $('#sheetIdRed').show();
+
+                            }
+
+                            if (data['StkL1'] == 0 || data['StkL1'] == '0') {
+
+                                $('#btnCut').hide();
+                                $('#disCut').show();
+                            }
+
+                            if (Number(data['StkL2']) > 0) {
+
+                                $('#btnFold').show();
+                                $('#disFold').hide();
+
+                            }
+
+                            var button = $('#reset-lap');
+                            button.click();
+
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+
+                });
+
+                $("#btnFold").click(function () {
+
+                    wichButtonClick = 'foldTime';
+
+                    if(!stopwatch.running()){
+                        stopwatch.start();
+                    }
+
+                    var url = '/prod_three/';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            $('#totalStack').text(data['totalStack']+'€');
+
+                            $('#foldProd').text(data['L3Prod']);
+                            $('#foldCost').text(data['L3Cost']+'€');
+                            $('#foldTime').text(data['L3TC']+'s');
+
+                            if (data['StkL3'] > data['minStkL3'] && data['StkL3'] < data['maxStkL3']) {
+
+                                $('.labelFold').text(data['StkL3']);
+                                $('#foldIdYellow').hide();
+                                $('#foldIdGreen').show();
+                                $('#foldIdRed').hide();
+
+
+                            } else {
+
+                                $('.labelFold').text(data['StkL3']);
+                                $('#foldIdYellow').hide();
+                                $('#foldIdGreen').hide();
+                                $('#foldIdRed').show();
+
+                            }
+
+                            if (data['StkL2'] > data['minStkL2'] && data['StkL2'] < data['maxStkL2']) {
+
+                                $('.labelCut').text(data['StkL2']);
+                                $('#cutIdYellow').hide();
+                                $('#cutIdGreen').show();
+                                $('#cutIdRed').hide();
+
+                            } else {
+
+                                $('.labelCut').text(data['StkL2']);
+                                $('#cutIdYellow').hide();
+                                $('#cutIdGreen').hide();
+                                $('#cutIdRed').show();
+                            }
+
+                            if (Number(data['StkL2'] == 0) || data['StkL2'] == '0') {
+                                $('#btnFold').hide();
+                                $('#disFold').show();
+                            }
+
+                            if (Number(data['StkL3']) > 0) {
+                                $('#btnSleighPunching').show();
+                                $('#disSleighPunching').hide();
+                            }
+
+                            var button = $('#reset-lap');
+                            button.click();
+
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+
+                });
+
+
+                $("#btnSleighPunching").click(function () {
+
+                    wichButtonClick = 'sleighPunchingTime';
+
+                    if(!stopwatch.running()){
+                        stopwatch.start();
+                    }
+
+                    var url = '/prod_four/';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            $('#totalStack').text(data['totalStack']+'€');
+
+                            $('#sleighPunchingProd').text(data['L4Prod']);
+                            $('#sleighPunchingCost').text(data['L4Cost']+'€');
+                            $('#sleighPunchingTime').text(data['L4TC']+'s');
+
+                            if (data['StkL4'] > data['minStkL4'] && data['StkL4'] < data['maxStkL4']) {
+
+                                $('.labelProduct').text(data['StkL4']);
+                                $('#prodIdYellow').hide();
+                                $('#prodIdGreen').show();
+                                $('#prodIdRed').hide();
+
+                            } else {
+
+                                $('.labelProduct').text(data['StkL4']);
+                                $('#prodIdYellow').hide();
+                                $('#prodIdGreen').hide();
+                                $('#prodIdRed').show();
+                            }
+
+                            if (data['StkL3'] > data['minStkL3'] && data['StkL3'] < data['maxStkL3']) {
+
+                                $('.labelFold').text(data['StkL3']);
+                                $('#foldIdYellow').hide();
+                                $('#foldIdGreen').show();
+                                $('#foldIdRed').hide();
+
+                            } else {
+
+                                $('.labelFold').text(data['StkL3']);
+                                $('#foldIdYellow').hide();
+                                $('#foldIdGreen').hide();
+                                $('#foldIdRed').show();
+
+
+                            }
+
+                            if (Number(data['StkL3']) == 0 || data['StkL3'] == '0') {
+
+                                $('#btnSleighPunching').hide();
+                                $('#disSleighPunching').show();
+                            }
+
+                            if (Number(data['StkL4']) > 0) {
+
+                                 $('#btnAssembly').show();
+                                $('#disAssembly').hide();
+
+                            }
+
+                           if(validate(data) == true){
+                                $('#btnAssembly').show();
+                                $('#disAssembly').hide();
+                            }else{
+                                $('#btnAssembly').hide();
+                                $('#disAssembly').show();
+                            }
+
+                            var button = $('#reset-lap');
+                            button.click();
+
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+
+                });
+
+
+                $("#btnAssembly").click(function () {
+
+                    wichButtonClick = 'assemblyTime';
+
+                    if(!stopwatch.running()){
+                        stopwatch.start();
+                    }
+
+                    var url = '/prod_five/';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            $('#totalStack').text(data['totalStack']+'€');
+
+                            $('#assemblyProd').text(data['ASSProd']);
+                            $('#assemblyCost').text(data['ASSCost']+'€');
+                            $('#assemblyTime').text(data['TCASS']+'s');
+
+                            $('#labelAssembly').text(data['StkASS']);
+                            $('.labelProduct').text(data['StkL4']);
+                            $('.labelSkiPunching').text(data['StkSKI2']);
+                            $('.labelSeatFolding').text(data['StkSEAT']);
+
+
+                            $('#cycleTime').text(data['TCASS']+'s');
+                            $('#unitRevenu').text(data['REV2']+'€');
+                            $('#cost').text(data['COUT']+'€');
+                            $('#sales').text(data['CA']+'€');
+                            $('#leadTime').text(data['TP']+'s');
+                            $('#totalStack').text(data['totalStack']+'€');
+
+                            
+
+                            if(validate(data) == true){
+                                $('#btnAssembly').show();
+                                $('#disAssembly').hide();
+                            }else{
+                                $('#btnAssembly').hide();
+                                $('#disAssembly').show();
+                            }
+
+
+                            var button = $('#reset-lap');
+                            button.click();
+
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+
+                });
+
+
+                $("#btnSkiFolding").click(function () {
+
+                    wichButtonClick = 'skiFoldingTime';
+
+                    if(!stopwatch.running()){
+                        stopwatch.start();
+                    }
+
+                    var url = '/prod_six/';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            $('#totalStack').text(data['totalStack']+'€');
+
+                            $('#skiFoldingProd').text(data['ProdSKI1']+'s');
+                            $('#skiFoldingCost').text(data['CSKI1']+'€');
+                            $('#skiFoldingTime').text(data['SKI1TC']);
+
+                            if (data['StkSKI1'] > data['minStkSKI1'] && data['StkSKI1'] < data['maxStkSKI1']) {
+                                $('.labelSkiFolding').text(data['StkSKI1']);
+                                $('#skiFoldingIdYellow').hide();
+                                $('#skiFoldingIdGreen').show();
+                                $('#skiFoldingIdRed').hide();
+
+                            }else {
+                                $('.labelSkiFolding').text(data['StkSKI1']);
+                                $('#skiFoldingIdYellow').hide();
+                                $('#skiFoldingIdGreen').hide();
+                                $('#skiFoldingIdRed').show();
+                            }
+
+                            if (Number(data['StkSKI1']) > 0){
+                                $('#btnSkiPunching').show();
+                                $('#disSkiPunching').hide();
+                            }
+
+                            var button = $('#reset-lap');
+                            button.click();
+
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+
+                });
+
+                $("#btnSkiPunching").click(function () {
+
+                    wichButtonClick = 'skiPunchingTime';
+
+                    if(!stopwatch.running()){
+                        stopwatch.start();
+                    }
+
+                    var url = '/prod_seven/';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            $('#totalStack').text(data['totalStack']+'€');
+
+                            $('#skiPunchingProd').text(data['ProdSKI2']);
+                            $('#skiPunchingCost').text(data['CSKI2']+'€');
+                            $('#skiPunchingTime').text(data['SKI2TC']+'s');
+
+                            if (data['StkSKI2'] > data['minStkSKI2'] && data['StkSKI2'] < data['maxStkSKI2']) {
+                                $('.labelSkiPunching').text(data['StkSKI2']);
+                                $('#skiPunchingIdYellow').hide();
+                                $('#skiPunchingIdGreen').show();
+                                $('#skiPunchingIdRed').hide();
+
+                            }else {
+                                $('.labelSkiPunching').text(data['StkSKI2']);
+                                $('#skiPunchingIdYellow').hide();
+                                $('#skiPunchingIdGreen').hide();
+                                $('#skiPunchingIdRed').show();
+                            }
+
+                            if (data['StkSKI1'] > data['minStkSKI1'] && data['StkSKI1'] < data['maxStkSKI1']) {
+                                $('.labelSkiFolding').text(data['StkSKI1']);
+                                $('#skiFoldingIdYellow').hide();
+                                $('#skiFoldingIdGreen').show();
+                                $('#skiFoldingIdRed').hide();
+
+                            }else {
+                                $('.labelSkiFolding').text(data['StkSKI1']);
+                                $('#skiFoldingIdYellow').hide();
+                                $('#skiFoldingIdGreen').hide();
+                                $('#skiFoldingIdRed').show();
+                            }
+
+                            // if (Number(data['StkSKI1']) == 0){
+                            // 	alert();
+                            //     $('#btnSkiPunching').hide();
+                            //     $('#disSkiPunching').show();
+                            // }
+
+                            if (Number(data['StkSKI1']) == 0){
+                               $('#btnAssembly').hide();
+                               $('#disAssembly').show();
+                            }
+
+                            if(validate(data) == true){
+                                $('#btnAssembly').show();
+                                $('#disAssembly').hide();
+                            }else{
+                                $('#btnAssembly').hide();
+                                $('#disAssembly').show();
+                            }
+
+                            var button = $('#reset-lap');
+                            button.click();
+
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+
+                });
+
+
+                $("#btnSeatFolding").click(function () {
+
+                    wichButtonClick = 'seatFoldingTime';
+
+                    if(!stopwatch.running()){
+                        stopwatch.start();
+                    }
+
+                    var url = '/prod_eight/';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            $('#totalStack').text(data['totalStack']+'€');
+                            $('#seatFoldingProd').text(data['ProdSEAT']);
+                            $('#seatFoldingCost').text(data['CSEAT']+'€');
+                            $('#seatFoldingTime').text(data['SEATTC']+'s');
+
+                            if (data['StkSEAT'] > data['minStkSEAT'] && data['StkSEAT'] < data['maxStkSEAT']) {
+                                $('.labelSeatFolding').text(data['StkSEAT']);
+                                $('#seatFoldingIdYellow').hide();
+                                $('#seatFoldingIdGreen').show();
+                                $('#seatFoldingIdRed').hide();
+
+                            }else {
+                                $('.labelSeatFolding').text(data['StkSEAT']);
+                                $('#seatFoldingIdYellow').hide();
+                                $('#seatFoldingIdGreen').hide();
+                                $('#seatFoldingIdRed').show();
+
+                            }
+
+                            if(validate(data) == true){
+                                $('#btnAssembly').show();
+                                $('#disAssembly').hide();
+                            }else{
+                                $('#btnAssembly').hide();
+                                $('#disAssembly').show();
+                            }
+
+
+                            var button = $('#reset-lap');
+                            button.click();
+
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+
+                });
+
+
+                $("#ncBtnSheet").click(function () {
+
+                    var url = '/nc_one/';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            $('#totalStack').text(data['totalStack']+'€');
+
+                            $('#sheetNc').text(data['L1NC']);
+                            $('#sheetProd').text(data['L1Prod']);
+
+                            $('#totalNc').text(data['totNC']);
+                            $('#totalNcCost').text(data['CostNC']);
+
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+
+                });
+
+                $("#ncBtnCut").click(function () {
+
+                    var url = '/nc_two/';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+                            $('#cutNc').text(data['L2NC']);
+                            $('#cutProd').text(data['L2Prod']);
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            $('#totalStack').text(data['totalStack']+'€');
+
+
+                            $('#totalNc').text(data['totNC']);
+                            $('#totalNcCost').text(data['CostNC']);
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+
+                });
+
+                $("#ncBtnFold").click(function () {
+
+                    var url = '/nc_three/';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+                            $('#foldNc').text(data['L3NC']);
+                            $('#foldProd').text(data['L3Prod']);
+
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            $('#totalStack').text(data['totalStack']+'€');
+
+                            $('#totalNc').text(data['totNC']);
+                            $('#totalNcCost').text(data['CostNC']);
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+                });
+
+                $("#ncBtnSleighPunching").click(function () {
+
+                    var url = '/nc_four/';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+                            $('#sleighPunchingNc').text(data['L4NC']);
+                            $('#sleighPunchingProd').text(data['L4Prod']);
+
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            $('#totalStack').text(data['totalStack']+'€');
+
+
+                            $('#totalNc').text(data['totNC']);
+                            $('#totalNcCost').text(data['CostNC']);
+
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+
+                });
+
+                $("#ncBtnAssembly").click(function () {
+
+                    var url = '/nc_five/';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+                            $('#assemblyNc').text(data['ASSNC']);
+                            $('#assemblyProd').text(data['ASSProd']);
+
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            
+                            $('#totalStack').text(data['totalStack']+'€');
+                            $('#totalNc').text(data['totNC']);
+                            $('#totalNcCost').text(data['CostNC']);
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+
+                });
+
+                $("#ncBtnSkiFolding").click(function () {
+
+                    var url = '/nc_six/';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+                            $('#skiFoldingNc').text(data['SKI1NC']);
+                            $('#skiFoldingProd').text(data['SKI1Prod']);
+
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            
+                            $('#totalStack').text(data['totalStack']+'€');
+                            $('#totalNc').text(data['totNC']);
+                            $('#totalNcCost').text(data['CostNC']);
+
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+
+                });
+
+                $("#ncBtnSkiPunching").click(function () {
+
+                    var url = '/nc_seven/';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+                            $('#skiPunchingNc').text(data['SKI2NC']);
+                            $('#skiPunchingProd').text(data['SKI2Prod']);
+
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            $('#totalStack').text(data['totalStack']+'€');
+
+                            $('#totalNc').text(data['totNC']);
+                            $('#totalNcCost').text(data['CostNC']);
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+
+                });
+
+                $("#ncBtnSeatFolding").click(function () {
+
+                    var url = '/nc_eight/';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+                            $('#seatFoldingNc').text(data['SEATNC']);
+                            $('#seatFoldingProd').text(data['SEATProd']);
+
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            $('#totalStack').text(data['totalStack']+'€');
+
+                            $('#totalNc').text(data['totNC']);
+                            $('#totalNcCost').text(data['CostNC']);
+
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+
+                });
+
+
+
+                function start_production(url, text) {
+
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': text,
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+                }
+
+
+                // $("#stopTimer").click(function () {
+
+                //     var url = '/stop_timer/';
+                //     window.location.reload();
+                // });
+
+
+
+
+                $( "#startTimer" ).click(function() {
+                   
+                  var state = {};
+                  state["currentState"] = true;
+                  var stateRef = firebase.database().ref("direction");
+                  stateRef.update(state);
+                  start_job();
+                  stopwatch.start();
+                  $(':button').prop('disabled', false);
+                  $('a').removeClass('disabled');
+                  $("#startTimer").prop('disabled', true);
+                  var url = '/getStartUpdate/';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            $('#totalStack').text(data['totalStack']+'€');
+
+                            $('.labelSheet').text(data['StkL1']);
+                            $('.labelCut').text(data['StkL2']);
+                            $('.labelFold').text(data['StkL3']);
+                            $('.labelProduct').text(data['StkL4']);
+                            $('.labelSkiFolding').text(data['StkSKI1']);
+                            $('.labelSkiPunching').text(data['StkSKI2']);
+                            $('.labelSeatFolding').text(data['StkSEAT']);
+                            $('#labelAssembly').text(data['StkASS']);
+
+                            console.log(JSON.stringify(data));
+
+                        },
+                        error: function (xhr, msg, err) {
+                               //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+                });
+
+                $("#pauseTimer").click(function() {
+                    var text = $("#pauseTimer").text();
+                    if(text === 'Pause'){
+                        $("#pauseTimer").text("Resume");
+                        var state = {};
+                        state["currentState"] = false;
+                        var stateRef = firebase.database().ref("direction");
+                        stateRef.update(state);
+                        $('a').addClass('disabled');
+                        pause_job();
+                        stopwatch.stop();
+                    }else{
+                        $("#pauseTimer").text("Pause");
+                        var state = {};
+                        state["currentState"] = true;
+                        var stateRef = firebase.database().ref("direction");
+                        stateRef.update(state);
+                        $('a').removeClass('disabled');
+                        resume_job();
+                        stopwatch.start();
+                    }
+                });
+
+
+                $("#setting").click(function(){
+                	
+                		if($("#startTimer").prop('disabled')){
+
+                			$("#pauseTimer").trigger("click");
+                		}
+
+                       
+                });
+
+                
+
+                $( "#stopTimer" ).click(function() {
+                    var text = $("#stopTimer").text();
+                    if(text === 'Stop'){
+                        $("#stopTimer").text("Re-Start");
+                      var state = {};
+                      state["currentState"] = false;
+                      var stateRef = firebase.database().ref("direction");
+                      stateRef.update(state);
+                      stop_job();
+                      stopwatch.stop();
+                      $("#pauseTimer").prop('disabled', true);
+                    }else{
+                        window.location.reload();
+                    }
+                });
+
+               
+
+            });
+
+
+        }
+
+
+
+
+                function start_job() {
+                    var url = "/start_job/";
+                    var text = "";
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': text,
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                        	$('#sleighPunchingMO').text(data['MOL4']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            $('#totalStack').text(data['totalStack']+'€');
+                            console.log(JSON.stringify(data));
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+                }
+
+                function resume_job() {
+                    var url = "/resume_job/";
+                    var text = "";
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': text,
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+                            $('#sleighPunchingMO').text(data['MOL4']);
+                            $('#foldMO').text(data['MOL3']);
+                            $('#cutMO').text(data['MOL2']);
+                            $('#sheetMO').text(data['MOL1']);
+                            $('#assemblyMO').text(data['MOASS']);
+                            $('#skiFoldingMO').text(data['MOSKI1']);
+                            $('#skiPunchingMO').text(data['MOSKI2']);
+                            $('#seatFoldingMO').text(data['MOSEAT']);
+                            $('#totalStack').text(data['totalStack']+'€');
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+                }
+
+                function pause_job() {
+                    var url = "/pause_job/";
+                    var text = "";
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': text,
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+                }
+
+                function stop_job() {
+                    var url = "/stop_job/";
+                    var text = "";
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': text,
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            console.log(JSON.stringify(data));
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                    });
+                }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <!-- END THEME PANEL -->
+    <h3 class="page-title"> Dashboard
+    </h3>
+
+{#    <br><br>#}
+    <div class="page-bar wrapper">
+    	<div></div>
+        <div id="watch-dial" class="tile" style=" width: 10em;">00:00:00:00</div>
+        <button id="start-stop" style="display: none" class="tile action-button start-button">Start</button>
+        <button id="reset-lap" style="display: none" class="tile action-button reset-button">Reset</button>
+        <ul id="laps"  style="display: none">
+        </ul>
+    </div> 
+    <button class="btn btn-success" id="startTimer">Démarrer</button>
+     <button class="btn btn-info" id="pauseTimer">Pause</button>
+    <button class="btn btn-danger" id="stopTimer">Arrêt</button>
+    <a href='{% url 'setting' %}' target="blank"><button class="btn btn-warning" id="setting" style="float:right;margin-right: 2em;"> <i class="icon-settings font-white"></i></button></a>
+    <br><br>
+
+
+    <!-- END PAGE HEADER-->
+    <!-- BEGIN DASHBOARD STATS 1-->
+    <div class="row">
+{#        <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12">#}
+{#            <a id="firstId" class="dashboard-stat dashboard-stat-v2 purple" href="#">#}
+{#                <div class="visual">#}
+{#                    <i class="fa fa-comments"></i>#}
+{#                </div>#}
+{#                <div class="details">#}
+{#                    <div class="number">#}
+{#                        100#}
+{#                    </div>#}
+{#                    <div class="desc">  </div>#}
+{#                </div>#}
+{#            </a>#}
+{#        </div>#}
+
+        <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12" style="position: relative;text-align: center;width: 12em;margin-right: -2.4em;margin-top:  -1.5em;margin-left: -2em;">            
+           <img src="{% static 'images/Truck.png' %}" style="width: 100%;margin-bottom: -10.5em;"> Plaques - 150€
+          
+           
+        </div>
+
+
+        <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12"  style="width: 138px;">
+            <a id="sheetId" class="dashboard-stat dashboard-stat-v2 blue" href="#">
+                <div class="visual">
+                    <i class="fa fa-comments"></i>
+                </div>
+                <div class="details">
+                    <div class="number">
+{#                        <span id="labelSheet"></span>#}
+                    </div>
+                    <div class="desc" > Traçage Luge </div>
+                </div>
+            </a>
+        </div>
+
+
+        <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12" style="padding: 0px">
+{#            <img src="{% static 'images/prism.jpg' %}" style="width: 50px;height: 50px;"><br><span style="margin-left: 20px;" id="labelSheet"></span>#}
+            <span style="" id="sheetIdYellow"><img src="{% static 'images/dark_yellow.png' %}" style="width: 50px;height: 40px;"><br><span style="margin-left: 20px;" class="labelSheet"></span></span>
+            <span style="display: none;" id="sheetIdGreen"><img src="{% static 'images/dark_green.png' %}" style="width: 50px;height: 40px;"><br><span style="margin-left: 20px;" class="labelSheet"></span></span>
+            <span style="display: none;" id="sheetIdRed"><img src="{% static 'images/prism_red.png' %}" style="width: 60px;height: 50px;"><br><span style="margin-left: 20px;" class="labelSheet"></span></span>
+
+        </div>
+
+
+        <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12" style="width: 108px;padding: 0;margin-left: 0.3em;">
+            <a id="cutId" class="dashboard-stat dashboard-stat-v2 blue" href="#">
+                <div class="visual">
+                    <i class="fa fa-bar-chart-o"></i>
+                </div>
+                <div class="details">
+                    <div class="number">
+{#                        <span id="labelCut"></span>#}
+                    </div>
+                    <div class="desc" style="text-align: -webkit-center;"> Découpe Luge </div>
+                </div>
+            </a>
+        </div>
+
+
+        <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12">
+{#            <img src="{% static 'images/prism.jpg' %}" style="width: 50px;height: 50px;"><br><span style="margin-left: 20px;" id="labelCut"></span>#}
+            <span style="" id="cutIdYellow"><img src="{% static 'images/dark_yellow.png' %}" style="width: 50px;height: 40px;"><br><span style="margin-left: 20px;" class="labelCut"></span></span>
+            <span style="display: none;" id="cutIdGreen"><img src="{% static 'images/dark_green.png' %}" style="width: 50px;height: 40px;"><br><span style="margin-left: 20px;" class="labelCut"></span></span>
+            <span style="display: none;" id="cutIdRed"><img src="{% static 'images/prism_red.png' %}" style="width: 60px;height: 50px;"><br><span style="margin-left: 20px;" class="labelCut"></span></span>
+
+        </div>
+
+        <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12" style="width: 138px; margin-left: 0.3em;">
+            <a id="foldId" class="dashboard-stat dashboard-stat-v2 blue" href="#">
+                <div class="visual">
+                    <i class="fa fa-shopping-cart"></i>
+                </div>
+                <div class="details">
+                    <div class="number">
+
+                    </div>
+                    <div class="desc" style="margin-right: 1.2em;"> Pliage Luge </div>
+                </div>
+            </a>
+        </div>
+
+
+        <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12" style="margin-left: -1em;">
+
+            <span style="" id="foldIdYellow"><img src="{% static 'images/dark_yellow.png' %}" style="width: 50px;height: 40px;"><br><span style="margin-left: 20px;" class="labelFold"></span></span>
+            <span style="display: none;" id="foldIdGreen"><img src="{% static 'images/dark_green.png' %}" style="width: 50px;height: 40px;"><br><span style="margin-left: 20px;" class="labelFold"></span></span>
+            <span style="display: none;" id="foldIdRed"><img src="{% static 'images/prism_red.png' %}" style="width: 60px;height: 50px;"><br><span style="margin-left: 20px;" class="labelFold"></span></span>
+        </div>
+
+        <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12" style="width: 138px;">
+            <a id="prodId" class="dashboard-stat dashboard-stat-v2 blue" href="#">
+                <div class="visual">
+                    <i class="fa fa-globe"></i>
+                </div>
+                <div class="details">
+                    <div class="number">
+{#                        <span id="labelProduct"></span>#}
+                    </div>
+                    <div class="desc"> Perçage Luge </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12" style="padding: 0px;">
+{#            <img src="{% static 'images/prism.jpg' %}" style="width: 50px;height: 50px;"><br><span style="margin-left: 20px;" id="labelProduct"></span>#}
+            <span style="" id="prodIdYellow"><img src="{% static 'images/dark_yellow.png' %}" style="width: 50px;height: 40px;"><br><span style="margin-left: 20px;" class="labelProduct"></span></span>
+            <span style="display: none;" id="prodIdGreen"><img src="{% static 'images/dark_green.png' %}" style="width: 50px;height: 40px;"><br><span style="margin-left: 20px;" class="labelProduct"></span></span>
+            <span style="display: none;" id="prodIdRed"><img src="{% static 'images/prism_red.png' %}" style="width: 60px;height: 50px;"><br><span style="margin-left: 20px;" class="labelProduct"></span></span>
+        </div>
+
+
+        <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12" style="width: 138px; margin-left: -0.8em;">
+
+            <a id="assemblyId" class="dashboard-stat dashboard-stat-v2 blue" href="#">
+                <div class="visual">
+                    <i class="fa fa-comments"></i>
+                </div>
+                <div class="details">
+                    
+                    <div class="desc" style="margin-right: 1.0em;"> Assemblage </div>
+                </div>
+            </a>
+        </div>
+        <!-- <div class="col-sm-0.5" style="padding: 0px;">
+        	<center>
+            <span><img src="{% static 'images/red sleigh.png' %}" style="width: 50px;height: 40px;"></span>
+            </center>
+            <div style="    text-align: -webkit-center;">
+                        <span id="labelAssembly"></span>
+             </div>
+  
+        </div>
+ -->
+        <div class="col-sm-0.5" style="padding: 0px;">
+
+            <span style="margin-left: -1em;"><img src="/static/images/red%20sleigh.png" style="width: 60px;height: 50px;"></span>
+
+            <div style="text-align: -webkit-right;margin-right: 5.5em; margin-top: -0.6em;"> <span id="labelAssembly">0</span></div>
+  
+        </div>
+
+{#        <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12">#}
+{#            <a id="lastId" class="dashboard-stat dashboard-stat-v2 purple" href="#">#}
+{#                <div class="visual">#}
+{#                    <i class="fa fa-comments"></i>#}
+{#                </div>#}
+{#                <div class="details">#}
+{#                    <div class="number">#}
+{#                        <span id="labelLast"></span>#}
+{#                    </div>#}
+{#                    <div class="desc">  </div>#}
+{#                </div>#}
+{#            </a>#}
+{#        </div>#}
+    </div>
+    <div class="clearfix"></div>
+    <!-- END DASHBOARD STATS 1-->
+    <!--Performance -->
+    <div class="row">
+
+        <div class="col-sm-1">
+        </div>
+
+        <div class="col-md-2 col-sm-6">
+            <div class="portlet light ">
+            <table>
+            <td>    
+                <table class="table" style="float: left;width: 50%;">
+                    <thead>
+                    <tr>
+                        <th>Op</th>
+                        <th>Prod</th>
+                        <th>NC</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="sheetMO">0</td>
+                        <td id="sheetProd">0</td>
+                        <td id="sheetNc">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+            <td>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>TC</th>
+                        <th>Coût</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="sheetTime">0</td>
+                        <td id="sheetCost">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+                </table>
+
+                <input type="hidden" id="calculatedSheetTime">
+                <input type="hidden" id="calculatedCutTime">
+                <input type="hidden" id="calculatedFoldTime">
+                <input type="hidden" id="calculatedSleighPunchingTime">
+
+                <a class="btn btn-lg green" id="btnSheet"> 1
+                    <i class="fa fa-plus"></i>
+                </a>
+                <a class="btn btn-lg green" style="display: none;width: 65px;" id="disSheet" disabled> X
+                </a>
+
+                <a class="btn btn-lg red" id="ncBtnSheet">
+                    NC
+                </a>
+
+            </div>
+        </div>
+
+        <div class="col-md-2 col-sm-6"  style="margin-left: 20px;">
+            <div class="portlet light ">
+                <table>
+                <td>            
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Op</th>
+                        <th>Prod</th>
+                        <th>NC</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="cutMO">0</td>
+                        <td id="cutProd">0</td>
+                        <td id="cutNc">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                </td>
+                <td>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>TC</th>
+                        <th>Coût</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="cutTime">0</td>
+                        <td id="cutCost">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                </td>
+            </table>
+                <a class="btn btn-lg green" id="btnCut"> 1
+                    <i class="fa fa-plus"></i>
+                </a>
+
+                <a class="btn btn-lg green" style="display: none;width: 65px;" id="disCut" disabled> X
+                </a>
+
+                <a class="btn btn-lg red" id="ncBtnCut">
+                    NC
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-2 col-sm-6"  style="margin-left: 20px;">
+            <div class="portlet light ">
+                <table>
+                <td>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Op</th>
+                        <th>Prod</th>
+                        <th>NC</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="foldMO">0</td>
+                        <td id="foldProd">0</td>
+                        <td id="foldNc">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                </td>
+                <td>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>TC</th>
+                        <th>Coût</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="foldTime">0</td>
+                        <td id="foldCost">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                </td>
+            </table>
+                <a class="btn btn-lg green" id="btnFold"> 1
+                    <i class="fa fa-plus"></i>
+                </a>
+
+                <a class="btn btn-lg green" style="display: none;width: 65px;" id="disFold" disabled> X
+                </a>
+
+                <a class="btn btn-lg red" id="ncBtnFold">
+                    NC
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-2 col-sm-6"  style="margin-left: 20px;">
+            <div class="portlet light ">
+                <table>
+                <td>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Op</th>
+                        <th>Prod</th>
+                        <th>NC</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="sleighPunchingMO">0</td>
+                        <td id="sleighPunchingProd">0</td>
+                        <td id="sleighPunchingNc">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                </td>
+                <td>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>TC</th>
+                        <th>Coût</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="sleighPunchingTime">0</td>
+                        <td id="sleighPunchingCost">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                </td>
+            </table>
+                <a class="btn btn-lg green" id="btnSleighPunching"> 1
+                    <i class="fa fa-plus"></i>
+                </a>
+
+                <a class="btn btn-lg green" style="display: none;width: 65px;" id="disSleighPunching" disabled> X
+                </a>
+
+                <a class="btn btn-lg red" id="ncBtnSleighPunching">
+                    NC
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-2 col-sm-2"  style="margin-left: 20px;">
+            <div class="portlet light ">
+                <table>
+                <td>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Op</th>
+                        <th>Prod</th>
+                        <th>NC</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="assemblyMO">0</td>
+                        <td id="assemblyProd">0</td>
+                        <td id="assemblyNc">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                </td>
+                <td>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>TC</th>
+                        <th>Coût</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="assemblyTime">0</td>
+                        <td id="assemblyCost">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                </td>
+            </table>
+                <a class="btn btn-lg green" id="btnAssembly"> 1
+                    <i class="fa fa-plus"></i>
+                </a>
+                <a class="btn btn-lg green" style="display: none;width: 65px;" id="disAssembly" disabled> X
+                </a>
+
+                <a class="btn btn-lg red" id="ncBtnAssembly">
+                    NC
+                </a>
+
+            </div>
+        </div>
+
+    </div>
+    <!--End Performance -->
+
+    <div class="col-md-4" style="margin-top: 2em;margin-left: 5.5em;">
+        <div class="col-md-12">        
+            <div class="portlet light portlet-fit " style="width: 27em;">
+                <div class="portlet-title">
+                    <div class="caption">
+                       
+                        <span class="caption-subject font-red sbold uppercase">Tableau de bord </span> &nbsp; &nbsp; &nbsp;TAKT TIME: 55s
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <div class="table-scrollable table-scrollable-borderless">
+                        <table class="table table-hover table-light">
+{#                            <thead>#}
+{#                                <tr class="uppercase">#}
+{#                                    <th> # </th>#}
+{#                                    <th> First Name </th>#}
+{#                                    <th> Last Name </th>#}
+{#                                    <th> Username </th>#}
+{#                                    <th> Status </th>#}
+{#                                </tr>#}
+{#                            </thead>#}
+                            <tbody>
+                                <tr>
+                                    <td> Temps de cycle </td>
+                                    <td id="cycleTime"> </td>
+                                </tr>
+                                <tr>
+                                    <td> Nombre total de non-conformités  </td>
+                                    <td id="totalNc"> </td>
+                                </tr>
+                                <tr>
+                                    <td> Coût total de la non-qualité </td>
+                                    <td id="totalNcCost"> </td>
+                                </tr>
+                                <tr>
+                                    <td> Temps de passage </td>
+                                    <td id="leadTime"> </td>
+                                </tr>
+                                 <tr>
+                                    <td> Coût de l'encours </td>
+                                    <td id="totalStack"> </td>
+                                </tr>
+                                 <tr>
+                                    <td> Total des ventes </td>
+                                    <td id="sales"> </td>
+                                </tr>
+                                 <tr>
+                                    <td> Coût d'opération </td>
+                                    <td id="cost"> </td>
+                                </tr>
+                                 <tr>
+                                    <td> Revenu unitaire </td>
+                                    <td id="unitRevenu"> </td>
+                                </tr>
+
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<div class="col-md-6">
+     <!-- BEGIN DASHBOARD STATS 1-->
+    <div class="row" style="margin-top: 1.5em;">
+{#        <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12">#}
+{#            <a id="firstId" class="dashboard-stat dashboard-stat-v2 purple" href="#">#}
+{#                <div class="visual">#}
+{#                    <i class="fa fa-comments"></i>#}
+{#                </div>#}
+{#                <div class="details">#}
+{#                    <div class="number">#}
+{#                        100#}
+{#                    </div>#}
+{#                    <div class="desc">  </div>#}
+{#                </div>#}
+{#            </a>#}
+{#        </div>#}
+
+        <!-- <div class="col-sm-2" style="margin-left: 13em;">
+            <span class="btn yellow" style="margin-left: -2em;margin-top: 0px;cursor: pointer; text-align: -webkit-center;">Skis découpés <br>- 5€</span>
+        </div> -->
+        <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12" style="position: relative;text-align: center;width:  13em;margin-left: 7.4em;margin-top:  -1.5em;">            
+           <img src="{% static 'images/Truck.png' %}" style="width: 100%;margin-bottom: -10.5em;"> Skis découpés - 20€
+          
+           
+        </div>
+
+
+<!--         <div class="col-lg-2 col-md-2 col-sm-6 col-xs-12" style="width: 138px;">
+            <a id="skiFoldingId" class="dashboard-stat dashboard-stat-v2 green" href="#">
+                <div class="visual">
+                    <i class="fa fa-bar-chart-o"></i>
+                </div>
+                <div class="details">
+                    <div class="number">
+{#                        <span id="labelSkiFolding"></span>#}
+                    </div>
+                    <div class="desc"> Ski Folding (2x) </div>
+                </div>
+            </a>
+        </div>
+ -->
+<!--         <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12" style="padding-left: 0px;">
+{#            <img src="{% static 'images/prism.jpg' %}" style="width: 50px;height: 50px;margin-top: 40px;"><br><span style="margin-left: 10px;">100</span>#}
+            <span style="" id="skiFoldingIdYellow"><img src="{% static 'images/dark_yellow.png' %}" style="width: 50px;height: 40px;margin-top: 40px;"><br><span style="margin-left: 20px;" class="labelSkiFolding"></span></span>
+            <span style="display: none;" id="skiFoldingIdGreen"><img src="{% static 'images/dark_green.png' %}" style="width: 50px;height: 40px;margin-top: 40px;"><br><span style="margin-left: 20px;" class="labelSkiFolding"></span></span>
+            <span style="display: none;" id="skiFoldingIdRed"><img src="{% static 'images/prism_red.png' %}" style="width: 60px;height: 50px;margin-top: 40px;"><br><span style="margin-left: 20px;" class="labelSkiFolding"></span></span>
+        </div> -->
+
+
+        <div class="col-lg-2 col-md-2 col-sm-6 col-xs-12" style="width: 125px;padding-left: 0px;    margin-left: 2em;">
+            <a id="skiPunchingId" class="dashboard-stat dashboard-stat-v2 green" href="#">
+                <div class="visual">
+                    <i class="fa fa-shopping-cart"></i>
+                </div>
+                <div class="details">
+                    <div class="number">
+{#                        <span id="labelSkiPunching"></span>#}
+                    </div>
+                    <div class="desc" style="text-align: -webkit-center;"> Perçage Ski </div>
+                </div>
+            </a>
+        </div>
+
+
+         <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12" style="padding: 0px;">
+{#            <img src="{% static 'images/prism.jpg' %}" style="width: 50px;height: 50px;"><br><span style="margin-left: 10px;">100</span>#}
+            <span style="" id="skiPunchingIdYellow"><img src="{% static 'images/dark_yellow.png' %}" style="width: 50px;height: 40px;"><br><span style="margin-left: 20px;" class="labelSkiPunching"></span></span>
+            <span style="display: none;" id="skiPunchingIdGreen"><img src="{% static 'images/dark_green.png' %}" style="width: 50px;height: 40px;"><br><span style="margin-left: 20px;" class="labelSkiPunching"></span></span>
+            <span style="display: none;" id="skiPunchingIdRed"><img src="{% static 'images/prism_red.png' %}" style="width: 60px;height: 50px;"><br><span style="margin-left: 20px;" class="labelSkiPunching"></span></span>
+        </div>
+
+
+{#        <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12">#}
+{#            <a id="lastId" class="dashboard-stat dashboard-stat-v2 purple" href="#">#}
+{#                <div class="visual">#}
+{#                    <i class="fa fa-comments"></i>#}
+{#                </div>#}
+{#                <div class="details">#}
+{#                    <div class="number">#}
+{#                        <span id="labelLast"></span>#}
+{#                    </div>#}
+{#                    <div class="desc">  </div>#}
+{#                </div>#}
+{#            </a>#}
+{#        </div>#}
+    </div>
+
+
+
+    <div class="clearfix"></div>
+    <!-- END DASHBOARD STATS 1-->
+    <!--Performance -->
+    <div class="row" >
+
+
+        <!-- <div class="col-md-2 col-sm-2">
+            <div class="portlet light ">
+
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Op</th>
+                        <th>Prod</th>
+                        <th>NC</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="skiFoldingMO">0</td>
+                        <td id="skiFoldingProd">0</td>
+                        <td id="skiFoldingNc">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>TC</th>
+                        <th>Coût</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="skiFoldingTime">0</td>
+                        <td id="skiFoldingCost">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <a class="btn btn-lg green" id="btnSkiFolding"> 1
+                    <i class="fa fa-plus"></i>
+                </a>
+
+                <a class="btn btn-lg green" style="display: none;width: 65px;" id="disSkiFolding" disabled> X
+                </a>
+
+                <a class="btn btn-lg red" id="ncBtnSkiFolding">
+                    NC
+                </a>
+            </div>
+        </div> -->
+
+
+       
+
+        <div class="col-md-2 col-sm-2" style="margin-left: 21.3em;">
+            <div class="portlet light ">
+                <table>
+                <td>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Op</th>
+                        <th>Prod</th>
+                        <th>NC</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="skiPunchingMO">0</td>
+                        <td id="skiPunchingProd">0</td>
+                        <td id="skiPunchingNc">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                </td>
+                <td>
+                 <table class="table">
+                    <thead>
+                    <tr>
+                        <th>TC</th>
+                        <th>Coût</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="skiPunchingTime">0</td>
+                        <td id="skiPunchingCost">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                </td>
+            </table>
+                <a class="btn btn-lg green" id="btnSkiPunching"> 1
+                    <i class="fa fa-plus"></i>
+                </a>
+
+                <a class="btn btn-lg green" style="display: none;width: 65px;" id="disSkiPunching" disabled> X
+                </a>
+
+                <a class="btn btn-lg red" id="ncBtnSkiPunching">
+                    NC
+                </a>
+            </div>
+        </div>
+
+    </div>
+    <!--End Performance -->
+
+      <!-- BEGIN DASHBOARD STATS 1-->
+    <div class="row" style="margin-top: 1.5em;">
+{#        <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12">#}
+{#            <a id="firstId" class="dashboard-stat dashboard-stat-v2 purple" href="#">#}
+{#                <div class="visual">#}
+{#                    <i class="fa fa-comments"></i>#}
+{#                </div>#}
+{#                <div class="details">#}
+{#                    <div class="number">#}
+{#                        100#}
+{#                    </div>#}
+{#                    <div class="desc">  </div>#}
+{#                </div>#}
+{#            </a>#}
+{#        </div>#}
+
+        <!-- <div class="col-sm-2" style="margin-left: 13em; text-align: -webkit-center;">
+            <span class="btn yellow" style="margin-left: -3em;margin-top: 0px;cursor: pointer;">Sièges découpés  <br> - 10€</span>
+        </div> -->
+        <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12" style="position: relative;text-align: center;width:  13em;margin-left: 7.4em;margin-top:  -1.5em;">            
+           <img src="{% static 'images/Truck.png' %}" style="width: 100%;margin-bottom: -10.5em;"> Sièges découpés - 40€
+          
+           
+        </div>
+
+
+        <div class="col-lg-2 col-md-2 col-sm-6 col-xs-12" style="width: 130px;margin-left: 1em;">
+            <a id="seatFoldingId" class="dashboard-stat dashboard-stat-v2 yellow" href="#">
+                <div class="visual">
+                    <i class="fa fa-globe"></i>
+                </div>
+                <div class="details">
+                    <div class="number">
+{#                        <span id="labelSeatFolding"></span>#}
+                    </div>
+                    <div class="desc" style="width: 6em;"> Pliage Siège </div>
+                </div>
+            </a>
+        </div>
+
+         <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12" style="padding: 0px;">
+{#            <img src="{% static 'images/prism.jpg' %}" style="width: 50px;height: 50px;"><br><span style="margin-left: 10px;">100</span>#}
+            <span style="" id="seatFoldingIdYellow"><img src="{% static 'images/dark_yellow.png' %}" style="width: 50px;height: 40px;"><br><span style="margin-left: 20px;" class="labelSeatFolding"></span></span>
+            <span style="display: none;" id="seatFoldingIdGreen"><img src="{% static 'images/dark_green.png' %}" style="width: 50px;height: 40px;"><br><span style="margin-left: 20px;" class="labelSeatFolding"></span></span>
+            <span style="display: none;" id="seatFoldingIdRed"><img src="{% static 'images/prism_red.png' %}" style="width: 60px;height: 50px;"><br><span style="margin-left: 20px;" class="labelSeatFolding"></span></span>
+        </div>
+{#        <div class="col-lg-1 col-md-1 col-sm-6 col-xs-12">#}
+{#            <a id="lastId" class="dashboard-stat dashboard-stat-v2 purple" href="#">#}
+{#                <div class="visual">#}
+{#                    <i class="fa fa-comments"></i>#}
+{#                </div>#}
+{#                <div class="details">#}
+{#                    <div class="number">#}
+{#                        <span id="labelLast"></span>#}
+{#                    </div>#}
+{#                    <div class="desc">  </div>#}
+{#                </div>#}
+{#            </a>#}
+{#        </div>#}
+    </div>
+    <div class="clearfix"></div>
+    <!-- END DASHBOARD STATS 1-->
+    <!--Performance -->
+    <div class="row">
+
+        
+        <div class="col-md-2 col-sm-2" style="margin-left: 21.5em;">
+            <div class="portlet light ">
+                <table>
+                <td>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Op</th>
+                        <th>Prod</th>
+                        <th>NC</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="seatFoldingMO">0</td>
+                        <td id="seatFoldingProd">0</td>
+                        <td id="seatFoldingNc">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                </td>
+                <td>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>TC</th>
+                        <th>Coût</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="seatFoldingTime">0</td>
+                        <td id="seatFoldingCost">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                </td>
+            </table>
+                <input type="hidden" id="calculatedAssemblyTime">
+                <input type="hidden" id="calculatedSkiFoldingTime">
+                <input type="hidden" id="calculatedSkiPunchingTime">
+                <input type="hidden" id="calculatedSeatFoldingTime">
+
+                <a class="btn btn-lg green" id="btnSeatFolding"> 1
+                    <i class="fa fa-plus"></i>
+                </a>
+
+                <a class="btn btn-lg green" style="display: none;width: 65px;" id="disSeatFolding" disabled> X
+                </a>
+
+                <a class="btn btn-lg red" id="ncBtnSeatFolding">
+                    NC
+                </a>
+            </div>
+        </div>
+
+    </div>
+    <!--End Performance -->
+</div>
+    <div class="row">
+        <div class="col-md-12">
+             <!-- BEGIN BORDERED TABLE PORTLET-->
+<!--             <div class="portlet light portlet-fit " style="width: 27em;">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="icon-settings font-red"></i>
+                        <span class="caption-subject font-red sbold uppercase">Tableau de bord</span>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <div class="table-scrollable table-scrollable-borderless">
+                        <table class="table table-hover table-light">
+{#                            <thead>#}
+{#                                <tr class="uppercase">#}
+{#                                    <th> # </th>#}
+{#                                    <th> First Name </th>#}
+{#                                    <th> Last Name </th>#}
+{#                                    <th> Username </th>#}
+{#                                    <th> Status </th>#}
+{#                                </tr>#}
+{#                            </thead>#}
+                            <tbody>
+                                <tr>
+                                    <td> Temps de cycle (var:TCASS) </td>
+                                    <td id="cycleTime"> </td>
+                                </tr>
+                                <tr>
+                                    <td> Nombre total de non-conformités (var:totNC) </td>
+                                    <td id="totalNc"> </td>
+                                </tr>
+                                <tr>
+                                    <td> Coût total de la non-qualité var:CNC </td>
+                                    <td id="totalNcCost"> </td>
+                                </tr>
+                                <tr>
+                                    <td> Temps de passage var:TPformula </td>
+                                    <td id="leadTime"> </td>
+                                </tr>
+                                 <tr>
+                                    <td> Sales var:CA </td>
+                                    <td id="sales"> </td>
+                                </tr>
+                                 <tr>
+                                    <td> Cost var:COUT </td>
+                                    <td id="cost"> </td>
+                                </tr>
+                                 <tr>
+                                    <td> Coût revenu var:REV2 </td>
+                                    <td id="unitRevenu"> </td>
+                                </tr>
+
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div> -->
+            <!-- END BORDERED TABLE PORTLET-->
+        </div>
+    </div>
+
+{% endblock %}

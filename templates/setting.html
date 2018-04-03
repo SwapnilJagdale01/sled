@@ -1,0 +1,417 @@
+{% extends "base_page.html" %}
+{% load staticfiles %}
+
+{% block styleBlock %}
+
+<style>
+
+ .desc{
+     margin-left: 1px;
+     margin-right: 12px;
+ }
+
+.wrapper{
+  position: fixed;
+  top: 70px;
+  left: 0;
+  right: 0;
+  display: inline-block;
+  margin: auto;
+  width: 100px;
+  height: 20px;
+    z-index: 1;
+}
+
+#start-stop{
+  float: left;
+}
+
+#reset-lap{
+  float: right;
+}
+
+.tile{
+  border: none;
+  display: block;
+  border-radius: 0;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  -o-border-radius: 0;
+  -webkit-box-shadow: inset 0px 0px 1px #FFFFCC;
+  -moz-box-shadow: inset 0px 0px 1px #FFFFCC;
+  -o-box-shadow: inset 0px 0px 1px #FFFFCC;
+  box-shadow: inset 0px 0px 1px #FFFFCC;
+}
+
+.action-button{
+  cursor: pointer;
+  color: white;
+  font-size: 1em;
+  padding: 5px;
+  margin: 0;
+  margin-top: 10px;
+  width: 70px;
+}
+
+.action-button:hover{
+  outline: #999999 solid 1px;
+}
+
+.start-button{
+  background-color: #60a917;
+}
+
+.lap-button{
+  background-color: #4390df;
+}
+
+.reset-button, .stop-button{
+  background-color: #9a1616;
+}
+
+#watch-dial{
+  background-color: #333333;
+  font-family: monospace;
+  text-align: center;
+  color: white;
+  padding: 2px;
+}
+
+#laps{
+  margin-top: 70px;
+  height: 400px;
+  overflow-y: auto;
+  color: white;
+  list-style: none;
+  padding: 0px;
+}
+
+#laps > li{
+  border-color: white;
+  width: 100%;
+  display: inline-block;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  text-align: center;
+  font-family: monospace;
+  font-size: 1.5em;
+}
+
+/*Cust Css*/
+.page-sidebar-closed .page-content-wrapper .page-content {
+    margin-left: 0px !important;
+    margin-top: -5em !important;
+     height: 69em;
+}
+
+.page-header.navbar .page-top {
+    visibility: collapse !important;
+}
+
+.page-content{
+    height: 64em;
+}
+
+.portlet > .portlet-body.red, .portlet.red {
+    background-color: #eef2f5;
+}
+
+    </style>
+{% endblock %}
+
+{% block ScriptBlock %}
+
+<script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script> 
+
+    $( document ).ready(function() {
+        var url = '/get_data/';
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: {
+                'text': 'text',
+                csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+            },
+            success: function (data) {
+                console.log(JSON.stringify(data));
+                $('#inputMOL1').val(data['MOL1']);
+                $('#inputMOL2').val(data['MOL2']);
+                $('#inputMOL3').val(data['MOL3']);
+                $('#inputMOL4').val(data['MOL4']);
+                $('#inputMOSKI1').val(data['MOSKI1']);
+                $('#inputMOSKI2').val(data['MOSKI2']);
+                $('#inputMOSEAT').val(data['MOSEAT']);
+                $('#inputMOASS').val(data['MOASS']);
+
+                $('#inputStkL1').val(data['StkL1']);
+                $('#inputStkL2').val(data['StkL2']);
+                $('#inputStkL3').val(data['StkL3']);
+                $('#inputStkL4').val(data['StkL4']);
+                $('#inputStkSKI1').val(data['StkSKI1']);
+                $('#inputStkSKI2').val(data['StkSKI2']);
+                $('#inputStkSEAT').val(data['StkSEAT']);
+                $('#inputStkASS').val(data['StkASS']);
+
+                $('#inputminStkL1').val(data['minStkL1']);
+                $('#inputminStkL2').val(data['minStkL2']);
+                $('#inputminStkL3').val(data['minStkL3']);
+                $('#inputminStkL4').val(data['minStkL4']);
+                $('#inputminStkSKI1').val(data['minStkSKI1']);
+                $('#inputminStkSKI2').val(data['minStkSKI2']);
+                $('#inputminStkSEAT').val(data['minStkSEAT']);
+
+                $('#inputmaxStkL1').val(data['maxStkL1']);
+                $('#inputmaxStkL2').val(data['maxStkL2']);
+                $('#inputmaxStkL3').val(data['maxStkL3']);
+                $('#inputmaxStkL4').val(data['maxStkL4']);
+                $('#inputmaxStkSKI1').val(data['maxStkSKI1']);
+                $('#inputmaxStkSKI2').val(data['maxStkSKI2']);
+                $('#inputmaxStkSEAT').val(data['maxStkSEAT']);
+
+
+            },
+            error: function (xhr, msg, err) {
+                   //$("#loginError").text(xhr.responseJSON.error);
+            }
+
+        });
+    });
+
+function update_data(variableName,variableValue){
+    var url = '/update_data/';
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: {
+                'name': variableName,
+                'value': variableValue,
+                csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+            },
+            success: function (data) {
+                console.log(JSON.stringify(data));
+                
+            },
+            error: function (xhr, msg, err) {
+                   //$("#loginError").text(xhr.responseJSON.error);
+            }
+
+        });
+}
+
+
+</script>         
+{% endblock %}
+
+{% block content %}
+    <!-- END THEME PANEL -->
+    <h3 class="page-title"> Setting
+    </h3>
+
+<div class="col-md-12">
+    <div class="col-md-6">
+       <div class="portlet box red">
+            <!-- Default panel contents -->
+            <div class="portlet-title">
+                <h3 class="caption" style="padding:0px;margin: 10px;">Number of employee for each workstation</h3>
+            </div>
+            <!-- Table -->
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <td> MOL1 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputMOL1" id="inputMOL1"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('MOL1',$('#inputMOL1').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> MOL2 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputMOL2" id="inputMOL2"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('MOL2',$('#inputMOL2').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> MOL3 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputMOL3" id="inputMOL3"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('MOL3',$('#inputMOL3').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> MOL4 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputMOL4" id="inputMOL4"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('MOL4',$('#inputMOL4').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> MOSKI1 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputMOSKI1" id="inputMOSKI1"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('MOSKI1',$('#inputMOSKI1').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> MOSKI2 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputMOSKI2" id="inputMOSKI2"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('MOSKI2',$('#inputMOSKI2').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> MOSEAT </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputMOSEAT" id="inputMOSEAT"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('MOSEAT',$('#inputMOSEAT').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> MOASS </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputMOASS" id="inputMOASS"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('MOASS',$('#inputMOASS').val())">Update</button></td>
+                    </tr>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="portlet box red">
+            <!-- Default panel contents -->
+            <div class="portlet-title">
+                <h3 class="caption" style="padding:0px;margin: 10px;">Stock variables</h3>
+            </div>
+            <!-- Table -->
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <td> StkL1 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputStkL1" id="inputStkL1"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('StkL1',$('#inputStkL1').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> StkL2 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputStkL2" id="inputStkL2"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('StkL2',$('#inputStkL2').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> StkL3 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputStkL3" id="inputStkL3"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('StkL3',$('#inputStkL3').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> StkL4 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputStkL4" id="inputStkL4"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('StkL4',$('#inputStkL4').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> StkSKI1 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputStkSKI1" id="inputStkSKI1"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('StkSKI1',$('#inputStkSKI1').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> StkSKI2 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputStkSKI2" id="inputStkSKI2"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('StkSKI2',$('#inputStkSKI2').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> StkSEAT </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputStkSEAT" id="inputStkSEAT"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('StkSEAT',$('#inputStkSEAT').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> StkASS </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputStkASS" id="inputStkASS"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('StkASS',$('#inputStkASS').val())">Update</button></td>
+                    </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12">
+    <div class="col-md-6">
+       <div class="portlet box red">
+            <!-- Default panel contents -->
+            <div class="portlet-title">
+                <h3 class="caption" style="padding:0px;margin: 10px;">Min stock variables</h3>
+            </div>
+            <!-- Table -->
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <td> minStkL1 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputminStkL1" id="inputminStkL1"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('minStkL1',$('#inputminStkL1').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> minStkL2 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputminStkL2" id="inputminStkL2"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('minStkL2',$('#inputminStkL2').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> minStkL3 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputminStkL3" id="inputminStkL3"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('minStkL3',$('#inputminStkL3').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> minStkL4 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputminStkL4" id="inputminStkL4"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('minStkL4',$('#inputminStkL4').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> minStkSKI1 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputminStkSKI1" id="inputminStkSKI1"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('minStkSKI1',$('#inputminStkSKI1').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> minStkSKI2 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputminStkSKI2" id="inputminStkSKI2"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('minStkSKI2',$('#inputminStkSKI2').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> minStkSEAT </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputminStkSEAT" id="inputminStkSEAT"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('minStkSEAT',$('#inputminStkSEAT').val())">Update</button></td>
+                    </tr>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="portlet box red">
+            <!-- Default panel contents -->
+            <div class="portlet-title">
+                <h3 class="caption" style="padding:0px;margin: 10px;">Maximum stock variables</h3>
+            </div>
+            <!-- Table -->
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <td> maxStkL1 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputmaxStkL1" id="inputmaxStkL1"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('maxStkL1',$('#inputmaxStkL1').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> maxStkL2 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputmaxStkL2" id="inputmaxStkL2"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('maxStkL2',$('#inputmaxStkL2').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> maxStkL3 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputmaxStkL3" id="inputmaxStkL3"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('maxStkL3',$('#inputmaxStkL3').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> maxStkL4 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputmaxStkL4" id="inputmaxStkL4"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('maxStkL4',$('#inputmaxStkL4').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> maxStkSKI1 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputmaxStkSKI1" id="inputmaxStkSKI1"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('maxStkSKI1',$('#inputmaxStkSKI1').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> maxStkSKI2 </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputmaxStkSKI2" id="inputmaxStkSKI2"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('maxStkSKI2',$('#inputmaxStkSKI2').val())">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td> maxStkSEAT </td>
+                        <td><input type="text" class="form-control form-filter input-sm col-md-3" name="inputmaxStkSEAT" id="inputmaxStkSEAT"></td>
+                        <td><button class="btn btn-sm red btn-outline filter-cancel" onclick="update_data('maxStkSEAT',$('#inputmaxStkSEAT').val())">Update</button></td>
+                    </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+  
+
+{% endblock %}

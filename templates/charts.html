@@ -1,0 +1,52 @@
+{% extends "base_page.html" %}
+{% load staticfiles %}
+
+{% block styleBlock %}
+<link href="{% static 'assets/global/css/components.min.css' %}" rel="stylesheet" id="style_components" type="text/css" />
+
+{% endblock %}
+
+
+{% block ScriptBlock %}
+<script type="text/javascript">
+    $( document ).ready(function() {
+
+
+        pageviews = [
+
+        [1, 10],
+        [2, 20],
+        [3, 30],
+        [4, 40]
+
+        ];
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+
+
+                        <div class="portlet light portlet-fit bordered">
+                                <div class="portlet-title">
+                                    <div class="caption">
+                                        <i class="icon-settings font-dark"></i>
+                                        <span class="caption-subject font-dark sbold uppercase">Interactive Chart</span>
+                                    </div>
+                                    <div class="actions">
+                                        <div class="btn-group btn-group-devided" data-toggle="buttons">
+                                            <label class="btn btn-transparent dark btn-outline btn-circle btn-sm active">
+                                                <input type="radio" name="options" class="toggle" id="option1">Actions</label>
+                                            <label class="btn btn-transparent dark btn-outline btn-circle btn-sm">
+                                                <input type="radio" name="options" class="toggle" id="option2">Settings</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="portlet-body">
+                                    <div id="chart_2" class="chart"> </div>
+                                </div>
+                            </div>
+                            
+                            
+                            
+{% endblock %}                            
