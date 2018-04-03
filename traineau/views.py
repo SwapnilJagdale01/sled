@@ -92,6 +92,10 @@ REV2 = 0 #revenu
 CA = 0 #total sales
 COUT = 0 #total cost
 CNC = 0 #cost of non-conformities
+
+#list variables 
+TDC=[]
+TK=[[0,55], [1,55], [2,55], [3,55], [4,55], [5,55], [6,55], [7,55], [8,55], [9,55], [10,55], [11,55], [12,55], [13,55], [14,55], [15,55], [16,55],[17,55], [18,55], [19,55], [20,55], [21,55], [22,55], [23,55], [24,55], [25,55], [26,55], [27,55], [28,55], [29,55], [30,55] ]
 global gTime, pauseTime, resumeTime, diffTime
 
 pauseTime=0.0
@@ -184,7 +188,7 @@ def get_initial_data(request):
     MOSEAT = 1 
     MOASS = 2 
     #Raw material cost 
-    global MPL, MPSEAT, MPSKI, C, sale, REV2, CA, COUT, CNC 
+    global MPL, MPSEAT, MPSKI, C, sale, REV2, CA, COUT, CNC, TDC
     MPL = 150 
     #sleigh 
     MPSEAT = 40 
@@ -201,7 +205,9 @@ def get_initial_data(request):
     COUT = 0 
     #total cost 
     CNC = 0 
-   
+    TDC=[]
+    
+    print "TDC", TDC
     #cost of non-conformities
     
     raw_dict = {}
@@ -431,6 +437,15 @@ def fProdASS(request):
     ProdASS = ProdASS + 1
     raw_dict['ASSProd'] = ProdASS
     TCASS= int(((time.time() -gTime)-diffTime)/(ProdASS)) # Cycle time of WS3 = actual Time / Qty produced at WS3
+    seconds= (time.time() -gTime)-diffTime
+    
+    m = seconds/ 60
+    m= round(m ,2)
+    temp=[m, TCASS]
+    TDC.append(temp)
+    print "TDC", TDC
+    temp2=[m, 55]
+    # TK.append(temp2);
     raw_dict['TCASS'] = TCASS
     raw_dict['timestamp'] = TCASS
     CASS = TCASS*MOASS*C
@@ -934,3 +949,11 @@ def update_data(request):
 def charts(request):
     
     return render(request, "charts.html")
+
+def temps_de_cycle(request):
+    global TDC, TK
+    raw_dict = {}
+    raw_dict['temps'] = TDC
+    raw_dict['takt'] = TK
+       
+    return HttpResponse(json.dumps(raw_dict), content_type="application/json")

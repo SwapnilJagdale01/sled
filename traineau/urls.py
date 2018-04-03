@@ -56,4 +56,8 @@ urlpatterns = [
     url(r'^update_data/$', views.update_data, name='update_data'),
     url(r'^getStartUpdate/$', views.getStartUpdate, name='getStartUpdate'),
     url(r'^charts/$', views.charts, name='charts'),
+    url(r'^temps_de_cycle/$', views.temps_de_cycle, name='temps_de_cycle'),
+
+
+    
 ]

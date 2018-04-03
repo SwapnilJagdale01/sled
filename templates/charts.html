@@ -2,51 +2,290 @@
 {% load staticfiles %}
 
 {% block styleBlock %}
-<link href="{% static 'assets/global/css/components.min.css' %}" rel="stylesheet" id="style_components" type="text/css" />
+<style>
 
+</style>
 {% endblock %}
 
 
 {% block ScriptBlock %}
 <script type="text/javascript">
-    $( document ).ready(function() {
+var ChartsFlotcharts = function() {
+
+    return {
+        //main function to initiate the module
 
 
-        pageviews = [
 
-        [1, 10],
-        [2, 20],
-        [3, 30],
-        [4, 40]
+        initCharts: function() {
 
-        ];
-    });
+            if (!jQuery.plot) {
+                return;
+            }
+
+            var data = [];
+            var totalPoints = 250;
+
+            // random data generator for plot charts
+
+            function getRandomData() {
+                if (data.length > 0) data = data.slice(1);
+                // do a random walk
+                while (data.length < totalPoints) {
+                    var prev = data.length > 0 ? data[data.length - 1] : 50;
+                    var y = prev + Math.random() * 10 - 5;
+                    if (y < 0) y = 0;
+                    if (y > 100) y = 100;
+                    data.push(y);
+                }
+                // zip the generated y values with the x values
+                var res = [];
+                for (var i = 0; i < data.length; ++i) {
+                    res.push([i, data[i]]);
+                }
+
+                return res;
+            }
+
+            //Basic Chart
+
+            function chart1() {
+                if ($('#chart_1').size() != 1) {
+                    return;
+                }
+
+
+            var data1 = [[1, 130], [2, 40], [3, 80], [4, 160], [5, 159], [6, 370], [7, 330], [8, 350], [9, 370], [10, 400], [11, 330], [12, 350]];
+
+
+
+                var plot = $.plot($("#chart_1"), [{
+                    data: data1,
+                    label: "Temps de cycle",
+                    lines: {
+                        lineWidth: 1,
+                    },
+                    shadowSize: 0
+
+                }], {
+                    series: {
+                        lines: {
+                            show: true,
+                            lineWidth: 2,
+                            fill: true,
+                            fillColor: {
+                                colors: [{
+                                    opacity: 0.05
+                                }]
+                            }
+                        },
+
+                    },
+
+                });
+
+
+
+
+
+
+            }
+
+            //Interactive Chart
+
+            function chart2(tdt, tk) {
+                if ($('#chart_2').size() != 1) {
+                    return;
+                }
+
+                function randValue() {
+                    return (Math.floor(Math.random() * (1 + 40 - 20))) + 20;
+                }
+                
+
+                var plot = $.plot($("#chart_2"), [{
+                    data: tdt,
+                    label: "Temps de cycle",
+                    lines: {
+                        lineWidth: 1,
+                    },
+                    shadowSize: 0
+
+                }, {
+                    data: tk,
+                    label: "Takt Time",
+                    lines: {
+                        lineWidth: 1,
+                    },
+                    shadowSize: 0
+                }], {
+                    series: {
+                        lines: {
+                            show: true,
+                            lineWidth: 2,
+                            fill: true,
+                            fillColor: {
+                                colors: [{
+                                    opacity: 0.05
+                                }, {
+                                    opacity: 0.01
+                                }]
+                            }
+                        },
+                        points: {
+                            show: true,
+                            radius: 3,
+                            lineWidth: 1
+                        },
+                        shadowSize: 2
+                    },
+                    grid: {
+                        hoverable: true,
+                        clickable: true,
+                        tickColor: "#eee",
+                        borderColor: "#eee",
+                        borderWidth: 1
+                    },
+                    colors: ["#d12610", "#37b7f3", "#52e136"],
+                    xaxis: {
+                        ticks: 11,
+                        tickDecimals: 0,
+                        tickColor: "#eee",
+                    },
+                    yaxis: {
+                        ticks: 11,
+                        tickDecimals: 0,
+                        tickColor: "#eee",
+                    }
+                });
+
+
+                function showTooltip(x, y, contents) {
+                    $('<div id="tooltip">' + contents + '</div>').css({
+                        position: 'absolute',
+                        display: 'none',
+                        top: y + 5,
+                        left: x + 15,
+                        border: '1px solid #333',
+                        padding: '4px',
+                        color: '#fff',
+                        'border-radius': '3px',
+                        'background-color': '#333',
+                        opacity: 0.80
+                    }).appendTo("body").fadeIn(200);
+                }
+
+                var previousPoint = null;
+                $("#chart_2").bind("plothover", function(event, pos, item) {
+                    $("#x").text(pos.x.toFixed(2));
+                    $("#y").text(pos.y.toFixed(2));
+
+                    if (item) {
+                        if (previousPoint != item.dataIndex) {
+                            previousPoint = item.dataIndex;
+
+                            $("#tooltip").remove();
+                            var x = item.datapoint[0].toFixed(2),
+                                y = item.datapoint[1].toFixed(2);
+
+                            showTooltip(item.pageX, item.pageY, item.series.label + " of " + x + " = " + y);
+                        }
+                    } else {
+                        $("#tooltip").remove();
+                        previousPoint = null;
+                    }
+                });
+            }
+
+            //Tracking Curves
+
+
+            //graph
+            //chart1();
+            
+
+            var url = '/temps_de_cycle/';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            chart2(data.temps, data.takt);
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                });
+
+        },
+
+    };
+}();
+ jQuery(document).ready(function() {
+
+    ChartsFlotcharts.initCharts();
+
+});
+
 </script>
 {% endblock %}
 
 {% block content %}
 
 
-                        <div class="portlet light portlet-fit bordered">
+
+
+
+                         <div class="portlet light portlet-fit bordered">
                                 <div class="portlet-title">
                                     <div class="caption">
-                                        <i class="icon-settings font-dark"></i>
-                                        <span class="caption-subject font-dark sbold uppercase">Interactive Chart</span>
+                                       <!--  <i class="icon-settings font-dark"></i> -->
+                                        <span class="caption-subject font-dark sbold uppercase">Temps de cycle Vs Takt Time</span>
                                     </div>
                                     <div class="actions">
-                                        <div class="btn-group btn-group-devided" data-toggle="buttons">
-                                            <label class="btn btn-transparent dark btn-outline btn-circle btn-sm active">
-                                                <input type="radio" name="options" class="toggle" id="option1">Actions</label>
-                                            <label class="btn btn-transparent dark btn-outline btn-circle btn-sm">
-                                                <input type="radio" name="options" class="toggle" id="option2">Settings</label>
-                                        </div>
+                                      
                                     </div>
                                 </div>
                                 <div class="portlet-body">
-                                    <div id="chart_2" class="chart"> </div>
+                                    <div id="chart_2" class="chart" > </div>
+
+
                                 </div>
                             </div>
-                            
-                            
-                            
-{% endblock %}                            
+
+       <!-- BEGIN BASIC CHART PORTLET-->
+                            <div class="portlet light portlet-fit ">
+                                <div class="portlet-title">
+                                    <div class="caption">
+                                        <i class=" icon-layers font-red"></i>
+                                        <span class="caption-subject font-red bold uppercase">Bar Chart</span>
+                                    </div>
+                                    <div class="actions">
+                                        <a class="btn btn-circle btn-icon-only btn-default" href="javascript:;">
+                                            <i class="icon-cloud-upload"></i>
+                                        </a>
+                                        <a class="btn btn-circle btn-icon-only btn-default" href="javascript:;">
+                                            <i class="icon-wrench"></i>
+                                        </a>
+                                        <a class="btn btn-circle btn-icon-only btn-default" href="javascript:;">
+                                            <i class="icon-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="portlet-body">
+                                    <div id="chart_1" class="chart" > </div>
+                                </div>
+                            </div>
+                            <!-- END BASIC CHART PORTLET-->
+
+                        </div>
+                    </div>
+
+
+
+
+{% endblock %}
