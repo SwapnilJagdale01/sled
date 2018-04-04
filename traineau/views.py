@@ -191,7 +191,7 @@ def get_initial_data(request):
     MOSEAT = 1 
     MOASS = 2 
     #Raw material cost 
-    global MPL, MPSEAT, MPSKI, C, sale, REV2, CA, COUT, CNC, TDC, TDP
+    global MPL, MPSEAT, MPSKI, C, sale, REV2, CA, COUT, CNC, TDC, TDP, batch_var
     MPL = 150 
     #sleigh 
     MPSEAT = 40 
@@ -210,7 +210,7 @@ def get_initial_data(request):
     CNC = 0 
     TDC=[]
     TDP=[]
-
+    batch_var=1
     print "TDP", TDP
     #cost of non-conformities
     
@@ -277,13 +277,23 @@ def ProdL1(request):
     print "pauseTime", pauseTime
     print "diffTime", diffTime    
 
+    
+
     TCL1 = int(((time.time() -gTime)- diffTime)/(Prod1))
     print TCL1
     raw_dict['L1TC'] = TCL1
    
     CL1 = TCL1 * MOL1 * C
     raw_dict['L1Cost'] = CL1
-    StkL1 = StkL1 + 1
+    StkL1 = StkL1 + batch_var
+
+    seconds= (time.time() -gTime)-diffTime
+    m = seconds/ 60
+    m= round(m ,2)
+    temp=[m, TCL1]
+    TDC.append(temp)
+    print "TDC", TDC
+    
     raw_dict['TP'] = (TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4),"s.")
     raw_dict['minStkL1'] = int(minStkL1)
     raw_dict['maxStkL1'] = int(maxStkL1)
@@ -323,8 +333,15 @@ def ProdL2(request):
     raw_dict['L2TC'] = TCL2
     CL2 = TCL2*MOL2*C
     raw_dict['L2Cost'] = CL2
-    StkL2 = StkL2 + 1
-    StkL1 = StkL1 - 1
+    StkL2 = StkL2 + batch_var
+    StkL1 = StkL1 - batch_var
+
+    seconds= (time.time() -gTime)-diffTime
+    m = seconds/ 60
+    m= round(m ,2)
+    temp=[m, TCL2]
+    TDC.append(temp)
+    print "TDC", TDC
 
     raw_dict['TP'] = (TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4),"s.")
 
@@ -373,8 +390,15 @@ def ProdL3(request):
     raw_dict['Prod3'] = int(Prod3)
     raw_dict['MOL3'] = int(MOL3)
 
-    StkL3 = StkL3 + 1 #increase stock after WS3
-    StkL2 = StkL2 - 1 #reduces stock before WS3
+    seconds= (time.time() -gTime)-diffTime
+    m = seconds/ 60
+    m= round(m ,2)
+    temp=[m, TCL3]
+    TDC.append(temp)
+    print "TDC", TDC
+
+    StkL3 = StkL3 + batch_var #increase stock after WS3
+    StkL2 = StkL2 - batch_var #reduces stock before WS3
 
     raw_dict['labL2'] = StkL2
     raw_dict['labL3'] = StkL3
@@ -420,8 +444,16 @@ def ProdL4(request):
     raw_dict['L4TC'] = TCL4
     CL4 = TCL4*MOL4*C  # Labor Cost/piece produced WS3 = Cycle time WS3 * nb of employees WS3 * Rate
     raw_dict['L4Cost'] = CL4
-    StkL4 = StkL4 + 1 #increase stock after WS3
-    StkL3 = StkL3 - 1 #reduces stock before WS3
+    StkL4 = StkL4 + batch_var #increase stock after WS3
+    StkL3 = StkL3 - batch_var #reduces stock before WS3
+
+
+    seconds= (time.time() -gTime)-diffTime
+    m = seconds/ 60
+    m= round(m ,2)
+    temp=[m, TCL4]
+    TDC.append(temp)
+    print "TDC", TDC
 
     raw_dict['StkL4'] = StkL4
     raw_dict['StkL3'] = StkL3
@@ -465,22 +497,20 @@ def fProdASS(request):
     raw_dict['ASSProd'] = ProdASS
     TCASS= int(((time.time() -gTime)-diffTime)/(ProdASS)) # Cycle time of WS3 = actual Time / Qty produced at WS3
     seconds= (time.time() -gTime)-diffTime
-
     m = seconds/ 60
     m= round(m ,2)
     temp=[m, TCASS]
     TDC.append(temp)
     print "TDC", TDC
-    temp2=[m, 55]
-    # TK.append(temp2);
+  
     raw_dict['TCASS'] = TCASS
     raw_dict['timestamp'] = TCASS
     CASS = TCASS*MOASS*C
     raw_dict['ASSCost'] = CASS
-    StkASS = StkASS + 1
-    StkL4 = StkL4 - 1
-    StkSKI2 = StkSKI2 - 1
-    StkSEAT = StkSEAT - 1
+    StkASS = StkASS + batch_var
+    StkL4 = StkL4 - batch_var
+    StkSKI2 = StkSKI2 - batch_var
+    StkSEAT = StkSEAT - batch_var
     raw_dict['StkL4'] = StkL4
     raw_dict['StkSKI2'] = StkSKI2
     raw_dict['StkSEAT'] = StkSEAT
@@ -526,7 +556,7 @@ def fProdSKI1(request):
     raw_dict['ProdSKI1'] = ProdSKI1
     raw_dict['SKI1TC'] = TCSKI1
     CSKI1 = TCSKI1*MOSKI1*C
-    StkSKI1 = StkSKI1 + 1
+    StkSKI1 = StkSKI1 + batch_var
 
     raw_dict['CSKI1'] = CSKI1
     raw_dict['StkSKI1'] = StkSKI1
@@ -557,8 +587,8 @@ def fProdSKI2(request):
     raw_dict['ProdSKI2'] = ProdSKI2
     # SKI2TC.configure(text=(TCSKI2,"s."))
     CSKI2 = TCSKI2*MOSKI2*C
-    StkSKI2 = StkSKI2 + 1
-    StkSKI1 = StkSKI1 - 1
+    StkSKI2 = StkSKI2 + batch_var
+    StkSKI1 = StkSKI1 - batch_var
 
     raw_dict['CSKI2'] = CSKI2
     raw_dict['StkSKI1'] = StkSKI1
@@ -595,7 +625,7 @@ def fProdSEAT(request):
     raw_dict['SEATTC'] = TCSEAT
     raw_dict['ProdSEAT'] = ProdSEAT
     CSEAT = TCSEAT*MOSEAT*C
-    StkSEAT = StkSEAT + 1
+    StkSEAT = StkSEAT + batch_var
 
     raw_dict['CSEAT'] = CSEAT
     raw_dict['StkSEAT'] = StkSEAT
@@ -907,7 +937,7 @@ def get_data(request):
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
 def update_data(request):
-    global MOL1, MOL2, MOL3, MOL4, MOSKI1, MOSKI2, MOSEAT, MOASS, StkL1, StkL2, StkL3, StkL4, StkSKI1, StkSKI2, StkSEAT, StkASS, minStkL1, minStkL2, minStkL3, minStkL4, minStkSKI1, minStkSKI2, minStkSEAT, maxStkL1, maxStkL2, maxStkL3, maxStkL4, maxStkSKI1, maxStkSKI2, maxStkSEAT
+    global MOL1, MOL2, MOL3, MOL4, MOSKI1, MOSKI2, MOSEAT, MOASS, StkL1, StkL2, StkL3, StkL4, StkSKI1, StkSKI2, StkSEAT, StkASS, minStkL1, minStkL2, minStkL3, minStkL4, minStkSKI1, minStkSKI2, minStkSEAT, maxStkL1, maxStkL2, maxStkL3, maxStkL4, maxStkSKI1, maxStkSKI2, maxStkSEAT, batch_var
     variable_name = request.POST.get('name')
     variable_value = int(request.POST.get('value'))
     
@@ -974,6 +1004,8 @@ def update_data(request):
         maxStkSKI2 = variable_value
     if(variable_name == 'maxStkSEAT'):
         maxStkSEAT = variable_value
+    if(variable_name == 'batchvar'):
+        batch_var = variable_value    
 
     return HttpResponse(content_type="application/json")
 
