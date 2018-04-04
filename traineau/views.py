@@ -8,6 +8,8 @@ import threading
 def home(request):
     return render(request, "home.html")
 
+#Bacth Variable
+batch_var=1
 
 #Stock variables
 StkL1 = 2
@@ -93,7 +95,7 @@ CA = 0 #total sales
 COUT = 0 #total cost
 CNC = 0 #cost of non-conformities
 
-#list variables 
+#list variables
 TDP=[]
 TDC=[]
 TK=[[0,55], [1,55], [2,55], [3,55], [4,55], [5,55], [6,55], [7,55], [8,55], [9,55], [10,55], [11,55], [12,55], [13,55], [14,55], [15,55], [16,55],[17,55], [18,55], [19,55], [20,55], [21,55], [22,55], [23,55], [24,55], [25,55], [26,55], [27,55], [28,55], [29,55], [30,55] ]
@@ -264,10 +266,10 @@ def getStartUpdate(request):
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
 def ProdL1(request):
-    global StkL1, Prod1, CL1, TCL1, reload_page, timer, gTime, diffTime
-   
+    global StkL1, Prod1, CL1, TCL1, reload_page, timer, gTime, diffTime,batch_var
+
     raw_dict = {}
-    Prod1 = Prod1 + 1
+    Prod1 = Prod1 + batch_var
     raw_dict['L1Prod'] = int(Prod1)
     #TCL1 = int((timer[0] * 60 + timer[1] + timer[2] / 100) / (Prod1)) 
       
@@ -307,7 +309,7 @@ def ProdL1(request):
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
 def ProdL2(request):
-    global StkL2, StkL1, Prod2, CL2, TCL2, gTime, diffTime
+    global StkL2, StkL1, Prod2, CL2, TCL2, gTime, diffTime,batch_var
     raw_dict = {}
 
     #start()
@@ -315,7 +317,7 @@ def ProdL2(request):
     print "pauseTime", pauseTime
     print "diffTime", diffTime  
 
-    Prod2 = Prod2 + 1
+    Prod2 = Prod2 + batch_var
     raw_dict['L2Prod'] = Prod2
     TCL2= int(((time.time() -gTime)-diffTime)/(Prod2))
     raw_dict['L2TC'] = TCL2
@@ -357,12 +359,12 @@ def ProdL2(request):
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
 def ProdL3(request):
-    global StkL3, StkL2, Prod3, CL3, TCL3, diffTime
+    global StkL3, StkL2, Prod3, CL3, TCL3, diffTime,batch_var
     raw_dict = {}
 
     #start()
 
-    Prod3 = Prod3 + 1 #Increases production of workstation3(WS3). Will be on the mobile app as well
+    Prod3 = Prod3 + batch_var #Increases production of workstation3(WS3). Will be on the mobile app as well
     raw_dict['L3Prod'] = Prod3
     TCL3= int(((time.time() -gTime)-diffTime)/(Prod3)) # Cycle time of WS3 = actual Time / Qty produced at WS3
     raw_dict['L3TC'] = TCL3
@@ -407,12 +409,12 @@ def ProdL3(request):
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
 def ProdL4(request):
-    global StkL4, StkL3, Prod4, CL4, TCL4, MOL4, diffTime
+    global StkL4, StkL3, Prod4, CL4, TCL4, MOL4, diffTime,batch_var
     raw_dict = {}
 
     #start()
 
-    Prod4 = Prod4 + 1 #Increases production of workstation3(WS3). Will be on the mobile app as well
+    Prod4 = Prod4 + batch_var #Increases production of workstation3(WS3). Will be on the mobile app as well
     raw_dict['L4Prod'] = Prod4
     TCL4= int(((time.time() -gTime)-diffTime)/(Prod4)) # Cycle time of WS3 = actual Time / Qty produced at WS3
     raw_dict['L4TC'] = TCL4
@@ -454,16 +456,16 @@ def ProdL4(request):
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
 def fProdASS(request):
-    global StkASS, StkL4,ProdASS,CASS,CA,COUT,REV2, TCASS,StkSKI2,StkSEAT, diffTime
+    global StkASS, StkL4,ProdASS,CASS,CA,COUT,REV2, TCASS,StkSKI2,StkSEAT, diffTime,batch_var
     raw_dict = {}
 
     #start()
 
-    ProdASS = ProdASS + 1
+    ProdASS = ProdASS + batch_var
     raw_dict['ASSProd'] = ProdASS
     TCASS= int(((time.time() -gTime)-diffTime)/(ProdASS)) # Cycle time of WS3 = actual Time / Qty produced at WS3
     seconds= (time.time() -gTime)-diffTime
-    
+
     m = seconds/ 60
     m= round(m ,2)
     temp=[m, TCASS]
@@ -513,12 +515,12 @@ def fProdASS(request):
 
 
 def fProdSKI1(request):
-    global StkSKI1,ProdSKI1,CSKI1, TCSKI1
+    global StkSKI1,ProdSKI1,CSKI1, TCSKI1,batch_var
 
     #start()
 
     raw_dict = {}
-    ProdSKI1 = ProdSKI1 + 1
+    ProdSKI1 = ProdSKI1 + batch_var
     TCSKI1= int(((time.time() -gTime)-diffTime)/(ProdSKI1))
     # SKI1TC.configure(text=(TCSKI1,"s."))
     raw_dict['ProdSKI1'] = ProdSKI1
@@ -545,11 +547,11 @@ def fProdSKI1(request):
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
 def fProdSKI2(request):
-    global StkSKI1,StkSKI2,ProdSKI2,CSKI2, TCSKI2, diffTime
+    global StkSKI1,StkSKI2,ProdSKI2,CSKI2, TCSKI2, diffTime,batch_var
     #start()
 
     raw_dict = {}
-    ProdSKI2 = ProdSKI2 + 1
+    ProdSKI2 = ProdSKI2 + batch_var
     TCSKI2= int(((time.time() -gTime)-diffTime)/(ProdSKI2))
     raw_dict['SKI2TC'] = TCSKI2
     raw_dict['ProdSKI2'] = ProdSKI2
@@ -584,11 +586,11 @@ def fProdSKI2(request):
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
 def fProdSEAT(request):
-    global StkSEAT,ProdSEAT,CSEAT, TCSEAT, diffTime
+    global StkSEAT,ProdSEAT,CSEAT, TCSEAT, diffTime,batch_var
 
     #start()
     raw_dict = {}
-    ProdSEAT = ProdSEAT + 1
+    ProdSEAT = ProdSEAT + batch_var
     TCSEAT= int(((time.time() -gTime)-diffTime)/(ProdSEAT))
     raw_dict['SEATTC'] = TCSEAT
     raw_dict['ProdSEAT'] = ProdSEAT
@@ -990,9 +992,9 @@ def temps_de_cycle(request):
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
 def temps_de_passage(request):
-    
+
     raw_dict = {}
-    raw_dict['TDP'] = TDP   
+    raw_dict['TDP'] = TDP
     print TDP
-       
-    return HttpResponse(json.dumps(raw_dict), content_type="application/json")    
+
+    return HttpResponse(json.dumps(raw_dict), content_type="application/json")
