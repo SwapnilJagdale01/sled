@@ -333,6 +333,7 @@
                             $('#skiPunchingMO').text(data['MOSKI2']);
                             $('#seatFoldingMO').text(data['MOSEAT']);
                             $('#totalStack').text(data['totalStack']+'€');
+                           // $('#cycleTime').text(data['TCL1']+'s');
 {#                            alert(data['StkL1']);#}
 {#                            alert(data['minStkL1']);#}
                             if (data['StkL1'] <= data['minStkL1'] ) {
@@ -344,7 +345,7 @@
 
 
                             }
-                            else if (data['StkL1'] >= data['minStkL1'] ){
+                            else if (data['StkL1'] >= data['maxStkL1'] ){
 
                                 $('.labelSheet').text(data['StkL1']);
                                 $('#sheetIdYellow').show();
@@ -414,7 +415,7 @@
                             $('#skiPunchingMO').text(data['MOSKI2']);
                             $('#seatFoldingMO').text(data['MOSEAT']);
                             $('#totalStack').text(data['totalStack']+'€');
-
+                          //   $('#cycleTime').text(data['TCL2']+'s');
                             $('#cutProd').text(data['L2Prod']);
                             $('#cutCost').text(data['L2Cost']+'€');
                             $('#cutTime').text(data['L2TC']+'s');
@@ -427,7 +428,7 @@
                                 $('#cutIdRed').show();
 
                             }
-                            else if (data['StkL2'] >= data['minStkL2']){
+                            else if (data['StkL2'] >= data['maxStkL2']){
 
                                 $('.labelCut').text(data['StkL2']);
                                 $('#cutIdYellow').show();
@@ -452,7 +453,7 @@
                                 $('#sheetIdRed').show();
 
                             }
-                            else if(data['StkL1'] >= data['minStkL1']){
+                            else if(data['StkL1'] >= data['maxStkL1']){
 
                                 $('.labelSheet').text(data['StkL1']);
                                 $('#sheetIdYellow').show();
@@ -521,7 +522,7 @@
                             $('#skiPunchingMO').text(data['MOSKI2']);
                             $('#seatFoldingMO').text(data['MOSEAT']);
                             $('#totalStack').text(data['totalStack']+'€');
-
+                           // $('#cycleTime').text(data['TCL3']+'s');
                             $('#foldProd').text(data['L3Prod']);
                             $('#foldCost').text(data['L3Cost']+'€');
                             $('#foldTime').text(data['L3TC']+'s');
@@ -534,7 +535,7 @@
 
 
                             }
-                            else if(data['StkL3'] >= data['minStkL3'] ){
+                            else if(data['StkL3'] >= data['maxStkL3'] ){
 
                                 $('.labelFold').text(data['StkL3']);
                                 $('#foldIdYellow').show();
@@ -559,7 +560,7 @@
                                 $('#cutIdRed').show();
 
                             }
-                            else if(data['StkL2'] >= data['minStkL2']){
+                            else if(data['StkL2'] >= data['maxStkL2']){
 
                                 $('.labelCut').text(data['StkL2']);
                                 $('#cutIdYellow').show();
@@ -626,7 +627,7 @@
                             $('#skiPunchingMO').text(data['MOSKI2']);
                             $('#seatFoldingMO').text(data['MOSEAT']);
                             $('#totalStack').text(data['totalStack']+'€');
-
+                            // $('#cycleTime').text(data['TCL4']+'s');
                             $('#sleighPunchingProd').text(data['L4Prod']);
                             $('#sleighPunchingCost').text(data['L4Cost']+'€');
                             $('#sleighPunchingTime').text(data['L4TC']+'s');
@@ -638,7 +639,7 @@
                                 $('#prodIdRed').show();
 
                             }
-                            else if (data['StkL4'] >= data['minStkL4'] ){
+                            else if (data['StkL4'] >= data['maxStkL4'] ){
 
                                 $('.labelProduct').text(data['StkL4']);
                                 $('#prodIdYellow').show();
@@ -661,7 +662,7 @@
                                 $('#foldIdRed').show();
 
                             }
-                            else if(data['StkL3'] >= data['minStkL3']){
+                            else if(data['StkL3'] >= data['maxStkL3']){
 
                                 $('.labelFold').text(data['StkL3']);
                                 $('#foldIdYellow').show();
@@ -812,7 +813,7 @@
                             $('#skiPunchingMO').text(data['MOSKI2']);
                             $('#seatFoldingMO').text(data['MOSEAT']);
                             $('#totalStack').text(data['totalStack']+'€');
-
+                            // $('#cycleTime').text(data['TCSKI1']+'s');
                             $('#skiFoldingProd').text(data['ProdSKI1']+'s');
                             $('#skiFoldingCost').text(data['CSKI1']+'€');
                             $('#skiFoldingTime').text(data['SKI1TC']);
@@ -823,7 +824,7 @@
                                 $('#skiFoldingIdRed').show();
 
                             }
-                            else if (data['StkSKI1'] >= data['minStkSKI1']){
+                            else if (data['StkSKI1'] >= data['maxStkSKI1']){
                                 $('.labelSkiFolding').text(data['StkSKI1']);
                                 $('#skiFoldingIdYellow').show();
                                 $('#skiFoldingIdGreen').hide();
@@ -883,7 +884,7 @@
                             $('#skiPunchingMO').text(data['MOSKI2']);
                             $('#seatFoldingMO').text(data['MOSEAT']);
                             $('#totalStack').text(data['totalStack']+'€');
-
+                           // $('#cycleTime').text(data['TCSKI2']+'s');
                             $('#skiPunchingProd').text(data['ProdSKI2']);
                             $('#skiPunchingCost').text(data['CSKI2']+'€');
                             $('#skiPunchingTime').text(data['SKI2TC']+'s');
@@ -895,7 +896,7 @@
                                 $('#skiPunchingIdRed').show();
 
                             }
-                            else if(data['StkSKI2'] >= data['minStkSKI2'] ){
+                            else if(data['StkSKI2'] >= data['maxStkSKI2'] ){
                                 $('.labelSkiPunching').text(data['StkSKI2']);
                                 $('#skiPunchingIdYellow').show();
                                 $('#skiPunchingIdGreen').hide();
@@ -915,7 +916,7 @@
                                 $('#skiFoldingIdRed').show();
 
                             }
-                            else if(data['StkSKI1'] >= data['minStkSKI1'] ){
+                            else if(data['StkSKI1'] >= data['maxStkSKI1'] ){
                                 $('.labelSkiFolding').text(data['StkSKI1']);
                                 $('#skiFoldingIdYellow').show();
                                 $('#skiFoldingIdGreen').hide();
@@ -990,6 +991,7 @@
                             $('#skiPunchingMO').text(data['MOSKI2']);
                             $('#seatFoldingMO').text(data['MOSEAT']);
                             $('#totalStack').text(data['totalStack']+'€');
+                           // $('#cycleTime').text(data['TCSEAT']+'s');
                             $('#seatFoldingProd').text(data['ProdSEAT']);
                             $('#seatFoldingCost').text(data['CSEAT']+'€');
                             $('#seatFoldingTime').text(data['SEATTC']+'s');
@@ -1000,7 +1002,7 @@
                                 $('#seatFoldingIdRed').show();
 
                             }
-                            else if (data['StkSEAT'] >= data['minStkSEAT']) {
+                            else if (data['StkSEAT'] >= data['maxStkSEAT']) {
                                 $('.labelSeatFolding').text(data['StkSEAT']);
                                 $('#seatFoldingIdYellow').show();
                                 $('#seatFoldingIdGreen').hide();
@@ -1443,10 +1445,10 @@
                 			$("#pauseTimer").trigger("click");
                 		}
 
-                       
+
                 });
 
-                
+
 
                 $( "#stopTimer" ).click(function() {
                     var text = $("#stopTimer").text();
@@ -1591,7 +1593,9 @@
     <button class="btn btn-success" id="startTimer">Démarrer</button>
      <button class="btn btn-info" id="pauseTimer">Pause</button>
     <button class="btn btn-danger" id="stopTimer">Arrêt</button>
-    <a href='{% url 'setting' %}' target="blank"><button class="btn btn-warning" id="setting" style="float:right;margin-right: 2em;"> <i class="icon-settings font-white"></i></button></a>
+    <a href='{% url 'charts' %}' target="blank"><button class="btn btn-warning" id="charts" style="margin-left: 64em;"> <i class="fa fa-bar-chart "></i></button></a>
+
+    <a href='{% url 'setting' %}' target="blank"><button class="btn btn-warning" id="setting" style="margin-left: 76em;margin-top:-4em"> <i class="icon-settings font-white"></i></button></a>
     <br><br>
 
 
