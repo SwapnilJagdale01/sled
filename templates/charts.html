@@ -49,19 +49,19 @@ var ChartsFlotcharts = function() {
 
             //Basic Chart
 
-            function chart1() {
-                if ($('#chart_1').size() != 1) {
+            function chart_passage(TDP) {
+                if ($('#chart_passage').size() != 1) {
                     return;
                 }
 
+                function randValue() {
+                    return (Math.floor(Math.random() * (1 + 40 - 20))) + 20;
+                }
+               
 
-            var data1 = [[1, 130], [2, 40], [3, 80], [4, 160], [5, 159], [6, 370], [7, 330], [8, 350], [9, 370], [10, 400], [11, 330], [12, 350]];
-
-
-
-                var plot = $.plot($("#chart_1"), [{
-                    data: data1,
-                    label: "Temps de cycle",
+                var plot = $.plot($("#chart_passage"), [{
+                    data: TDP,
+                    label: "Temps de passage",
                     lines: {
                         lineWidth: 1,
                     },
@@ -76,19 +76,74 @@ var ChartsFlotcharts = function() {
                             fillColor: {
                                 colors: [{
                                     opacity: 0.05
+                                }, {
+                                    opacity: 0.01
                                 }]
                             }
                         },
-
+                        points: {
+                            show: true,
+                            radius: 3,
+                            lineWidth: 1
+                        },
+                        shadowSize: 2
                     },
-
+                    grid: {
+                        hoverable: true,
+                        clickable: true,
+                        tickColor: "#eee",
+                        borderColor: "#eee",
+                        borderWidth: 1
+                    },
+                    colors: ["#d12610", "#37b7f3", "#52e136"],
+                    xaxis: {
+                        ticks: 20,
+                        tickDecimals: 2,
+                        tickColor: "#eee",
+                    },
+                    yaxis: {
+                        ticks: 10,
+                        tickDecimals: 2,
+                        tickColor: "#eee",
+                    }
                 });
 
 
+                function showTooltip(x, y, contents) {
+                    $('<div id="tooltip">' + contents + '</div>').css({
+                        position: 'absolute',
+                        display: 'none',
+                        top: y + 5,
+                        left: x + 15,
+                        border: '1px solid #333',
+                        padding: '4px',
+                        color: '#fff',
+                        'border-radius': '3px',
+                        'background-color': '#333',
+                        opacity: 0.80
+                    }).appendTo("body").fadeIn(200);
+                }
 
+                var previousPoint = null;
+                $("#chart_passage").bind("plothover", function(event, pos, item) {
+                    $("#x").text(pos.x.toFixed(2));
+                    $("#y").text(pos.y.toFixed(2));
 
+                    if (item) {
+                        if (previousPoint != item.dataIndex) {
+                            previousPoint = item.dataIndex;
 
+                            $("#tooltip").remove();
+                            var x = item.datapoint[0].toFixed(2),
+                                y = item.datapoint[1].toFixed(2);
 
+                            showTooltip(item.pageX, item.pageY, item.series.label + " of " + x + " = " + y);
+                        }
+                    } else {
+                        $("#tooltip").remove();
+                        previousPoint = null;
+                    }
+                });
             }
 
             //Interactive Chart
@@ -148,8 +203,8 @@ var ChartsFlotcharts = function() {
                     },
                     colors: ["#d12610", "#37b7f3", "#52e136"],
                     xaxis: {
-                        ticks: 11,
-                        tickDecimals: 0,
+                        ticks: 20,
+                        tickDecimals: 2,
                         tickColor: "#eee",
                     },
                     yaxis: {
@@ -201,7 +256,7 @@ var ChartsFlotcharts = function() {
 
 
             //graph
-            //chart1();
+            //chart_passage();
             
 
             var url = '/temps_de_cycle/';
@@ -220,6 +275,30 @@ var ChartsFlotcharts = function() {
                         }
 
                 });
+
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '/temps_de_passage/',
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+                            
+                            if(data.TDP.length==0){
+                                data=[[1,],[2,],[3,],[4,],[5,],[6,],[7,],[8,],[9,],[10,]];
+                                chart_passage(data);
+                            }else{
+                                chart_passage(data.TDP);
+                            }
+                            
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                });        
 
         },
 
@@ -258,29 +337,27 @@ var ChartsFlotcharts = function() {
                             </div>
 
        <!-- BEGIN BASIC CHART PORTLET-->
-                            <div class="portlet light portlet-fit ">
+
+                         <div class="portlet light portlet-fit bordered">
                                 <div class="portlet-title">
                                     <div class="caption">
-                                        <i class=" icon-layers font-red"></i>
-                                        <span class="caption-subject font-red bold uppercase">Bar Chart</span>
+                                       <!--  <i class="icon-settings font-dark"></i> -->
+                                        <span class="caption-subject font-dark sbold uppercase">Temps de Passage</span>
                                     </div>
                                     <div class="actions">
-                                        <a class="btn btn-circle btn-icon-only btn-default" href="javascript:;">
-                                            <i class="icon-cloud-upload"></i>
-                                        </a>
-                                        <a class="btn btn-circle btn-icon-only btn-default" href="javascript:;">
-                                            <i class="icon-wrench"></i>
-                                        </a>
-                                        <a class="btn btn-circle btn-icon-only btn-default" href="javascript:;">
-                                            <i class="icon-trash"></i>
-                                        </a>
+                                      
                                     </div>
                                 </div>
                                 <div class="portlet-body">
-                                    <div id="chart_1" class="chart" > </div>
+                                    <div id="chart_passage" class="chart" > </div>
+
+
                                 </div>
                             </div>
+                      
                             <!-- END BASIC CHART PORTLET-->
+
+
 
                         </div>
                     </div>

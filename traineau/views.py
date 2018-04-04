@@ -94,6 +94,7 @@ COUT = 0 #total cost
 CNC = 0 #cost of non-conformities
 
 #list variables 
+TDP=[]
 TDC=[]
 TK=[[0,55], [1,55], [2,55], [3,55], [4,55], [5,55], [6,55], [7,55], [8,55], [9,55], [10,55], [11,55], [12,55], [13,55], [14,55], [15,55], [16,55],[17,55], [18,55], [19,55], [20,55], [21,55], [22,55], [23,55], [24,55], [25,55], [26,55], [27,55], [28,55], [29,55], [30,55] ]
 global gTime, pauseTime, resumeTime, diffTime
@@ -188,7 +189,7 @@ def get_initial_data(request):
     MOSEAT = 1 
     MOASS = 2 
     #Raw material cost 
-    global MPL, MPSEAT, MPSKI, C, sale, REV2, CA, COUT, CNC, TDC
+    global MPL, MPSEAT, MPSKI, C, sale, REV2, CA, COUT, CNC, TDC, TDP
     MPL = 150 
     #sleigh 
     MPSEAT = 40 
@@ -206,8 +207,9 @@ def get_initial_data(request):
     #total cost 
     CNC = 0 
     TDC=[]
-    
-    print "TDC", TDC
+    TDP=[]
+
+    print "TDP", TDP
     #cost of non-conformities
     
     raw_dict = {}
@@ -293,6 +295,11 @@ def ProdL1(request):
     raw_dict['MOSEAT'] = MOSEAT
     raw_dict['MOASS'] = MOASS
     raw_dict['totalStack'] = int((StkL1+StkL2+StkL3+StkL4)*MPL)+ int(StkSKI2*MPSEAT) + int(StkSEAT*MPSKI)
+    seconds=int((time.time() -gTime)- diffTime)
+    minutes= round(seconds/60, 2)
+
+    temp=[minutes, TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4)]
+    TDP.append(temp);
 
 
     #StkL1 + StkL2 + StkL3 + SkrL4) x SleighCost + StkSki x Skicost + StkSeat x SeatCost
@@ -341,6 +348,12 @@ def ProdL2(request):
     raw_dict['MOASS'] = MOASS
     raw_dict['totalStack'] = int((StkL1+StkL2+StkL3+StkL4)*MPL)+ int(StkSKI2*MPSEAT) + int(StkSEAT*MPSKI)
 
+    seconds=(time.time() -gTime)- diffTime
+    minutes= round(seconds/60, 2)
+
+    temp=[minutes, TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4)]
+    TDP.append(temp);
+
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
 def ProdL3(request):
@@ -385,6 +398,12 @@ def ProdL3(request):
     raw_dict['TP'] = (TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4),"s.")
     raw_dict['totalStack'] = int((StkL1+StkL2+StkL3+StkL4)*MPL)+ int(StkSKI2*MPSEAT) + int(StkSEAT*MPSKI)
 
+    seconds=(time.time() -gTime)- diffTime
+    minutes= round(seconds/60, 2)
+
+    temp=[minutes, TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4)]
+    TDP.append(temp);
+
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
 def ProdL4(request):
@@ -425,6 +444,12 @@ def ProdL4(request):
     raw_dict['TP'] = (TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4),"s.")
     #Turns the stock label to green if stock greater than the max qty or smaller than the min qty
     raw_dict['totalStack'] = int((StkL1+StkL2+StkL3+StkL4)*MPL)+ int(StkSKI2*MPSEAT) + int(StkSEAT*MPSKI)
+
+    seconds=(time.time() -gTime)- diffTime
+    minutes= round(seconds/60, 2)
+
+    temp=[minutes, TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4)]
+    TDP.append(temp);
 
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
@@ -476,6 +501,12 @@ def fProdASS(request):
     raw_dict['MOSEAT'] = MOSEAT
     raw_dict['MOASS'] = MOASS
     raw_dict['totalStack'] = int((StkL1+StkL2+StkL3+StkL4)*MPL)+ int(StkSKI2*MPSEAT) + int(StkSEAT*MPSKI)
+
+    seconds=(time.time() -gTime)- diffTime
+    minutes= round(seconds/60, 2)
+
+    temp=[minutes, TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4)]
+    TDP.append(temp);
 
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
@@ -957,3 +988,11 @@ def temps_de_cycle(request):
     raw_dict['takt'] = TK
        
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
+
+def temps_de_passage(request):
+    
+    raw_dict = {}
+    raw_dict['TDP'] = TDP   
+    print TDP
+       
+    return HttpResponse(json.dumps(raw_dict), content_type="application/json")    
