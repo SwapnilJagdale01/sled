@@ -296,7 +296,8 @@ def ProdL1(request):
     temp=[m, TCL1]
     TDC.append(temp)
     print "TDC", TDC
-   
+
+    raw_dict['TCL1'] = TCL1
     raw_dict['TP'] = (TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4),"s.")
     raw_dict['minStkL1'] = int(minStkL1)
     raw_dict['maxStkL1'] = int(maxStkL1)
@@ -345,7 +346,7 @@ def ProdL2(request):
     temp=[m, TCL2]
     TDC.append(temp)
     print "TDC", TDC
-
+    raw_dict['TCL2'] = TCL2
     raw_dict['TP'] = (TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4),"s.")
 
     raw_dict['Prod2'] = int(Prod2)
@@ -392,7 +393,7 @@ def ProdL3(request):
     raw_dict['L3Cost'] = CL3
     raw_dict['Prod3'] = int(Prod3)
     raw_dict['MOL3'] = int(MOL3)
-
+    raw_dict['TCL3'] = TCL3
     seconds= (time.time() -gTime)-diffTime
     m = seconds/ 60
     m= round(m ,2)
@@ -400,7 +401,7 @@ def ProdL3(request):
     TDC.append(temp)
     print "TDC", TDC
 
-   
+
     StkL3 = StkL3 + batch_var #increase stock after WS3
     StkL2 = StkL2 - batch_var #reduces stock before WS3
 
@@ -458,6 +459,7 @@ def ProdL4(request):
     temp=[m, TCL4]
     TDC.append(temp)
     print "TDC", TDC
+    raw_dict['TCL4'] = TCL4
 
 
     raw_dict['StkL4'] = StkL4
@@ -506,9 +508,9 @@ def fProdASS(request):
     # if Prod3:
     #     TCL3= int(((time.time() -gTime)-diffTime)/(Prod3))
 
-    # if Prod4:    
+    # if Prod4:
     #     TCL4= int(((time.time() -gTime)-diffTime)/(Prod4))
-    
+
     ProdASS = ProdASS + batch_var
     raw_dict['ASSProd'] = ProdASS
     TCASS= int(((time.time() -gTime)-diffTime)/(ProdASS)) # Cycle time of WS3 = actual Time / Qty produced at WS3
@@ -521,7 +523,7 @@ def fProdASS(request):
 
     temp=[m, ProdASS]
     P.append(temp)
-  
+
     raw_dict['TCASS'] = TCASS
     raw_dict['timestamp'] = TCASS
     CASS = TCASS*MOASS*C
@@ -577,10 +579,10 @@ def fProdSKI1(request):
     CSKI1 = TCSKI1*MOSKI1*C
     StkSKI1 = StkSKI1 + batch_var
 
-   
+
     raw_dict['CSKI1'] = CSKI1
     raw_dict['StkSKI1'] = StkSKI1
-
+    raw_dict['TCSKI1']=TCSKI1
     raw_dict['minStkSKI1'] = minStkSKI1
     raw_dict['maxStkSKI1'] = maxStkSKI1
 
@@ -607,7 +609,7 @@ def fProdSKI2(request):
     raw_dict['ProdSKI2'] = ProdSKI2
     # SKI2TC.configure(text=(TCSKI2,"s."))
 
-   
+
     CSKI2 = TCSKI2*MOSKI2*C
     StkSKI2 = StkSKI2 + batch_var
     StkSKI1 = StkSKI1 - batch_var
@@ -615,7 +617,7 @@ def fProdSKI2(request):
     raw_dict['CSKI2'] = CSKI2
     raw_dict['StkSKI1'] = StkSKI1
     raw_dict['StkSKI2'] = StkSKI2
-
+    raw_dict['TCSKI2']=TCSKI2
     raw_dict['StkL4'] = StkL4
     raw_dict['StkSEAT'] = StkSEAT
 
@@ -649,7 +651,8 @@ def fProdSEAT(request):
     CSEAT = TCSEAT*MOSEAT*C
     StkSEAT = StkSEAT + batch_var
 
-  
+
+    raw_dict['TCSEAT']=TCSEAT
     raw_dict['CSEAT'] = CSEAT
     raw_dict['StkSEAT'] = StkSEAT
 
@@ -858,7 +861,6 @@ def fNCASS(request):
 
 def init_data(request):
     raw_dict = update_timeText()
-
     return HttpResponse(raw_dict, content_type="application/json")
 
 def resume_job(request):
@@ -1061,4 +1063,4 @@ def production_graph(request):
     raw_dict['P'] = P
     print P
 
-    return HttpResponse(json.dumps(raw_dict), content_type="application/json")    
+    return HttpResponse(json.dumps(raw_dict), content_type="application/json")
