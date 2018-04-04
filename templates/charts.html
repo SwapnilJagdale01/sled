@@ -48,6 +48,103 @@ var ChartsFlotcharts = function() {
             }
 
             //Basic Chart
+            function tatalstock_graph(TSTACK)
+            {
+                 if ($('#tatalstock_graph').size() != 1) {
+                    return;
+                }
+
+                function randValue() {
+                    return (Math.floor(Math.random() * (1 + 40 - 20))) + 20;
+                }
+
+
+                var plot = $.plot($("#tatalstock_graph"), [{
+                    data: TSTACK,
+                    label: "Total Stock",
+                    lines: {
+                        lineWidth: 1,
+                    },
+                    shadowSize: 0
+
+                }], {
+                    series: {
+                        lines: {
+                            show: true,
+                            lineWidth: 2,
+                            fill: true,
+                            fillColor: {
+                                colors: [{
+                                    opacity: 0.05
+                                }, {
+                                    opacity: 0.01
+                                }]
+                            }
+                        },
+                        points: {
+                            show: true,
+                            radius: 3,
+                            lineWidth: 1
+                        },
+                        shadowSize: 2
+                    },
+                    grid: {
+                        hoverable: true,
+                        clickable: true,
+                        tickColor: "#eee",
+                        borderColor: "#eee",
+                        borderWidth: 1
+                    },
+                    colors: ["#d12610", "#37b7f3", "#52e136"],
+                    xaxis: {
+                        ticks: 20,
+                        tickDecimals: 2,
+                        tickColor: "#eee",
+                    },
+                    yaxis: {
+                        ticks: 10,
+                        tickDecimals: 2,
+                        tickColor: "#eee",
+                    }
+                });
+
+
+                function showTooltip(x, y, contents) {
+                    $('<div id="tooltip">' + contents + '</div>').css({
+                        position: 'absolute',
+                        display: 'none',
+                        top: y + 5,
+                        left: x + 15,
+                        border: '1px solid #333',
+                        padding: '4px',
+                        color: '#fff',
+                        'border-radius': '3px',
+                        'background-color': '#333',
+                        opacity: 0.80
+                    }).appendTo("body").fadeIn(200);
+                }
+
+                var previousPoint = null;
+                $("#tatalstock_graph").bind("plothover", function(event, pos, item) {
+                    $("#x").text(pos.x.toFixed(2));
+                    $("#y").text(pos.y.toFixed(2));
+
+                    if (item) {
+                        if (previousPoint != item.dataIndex) {
+                            previousPoint = item.dataIndex;
+
+                            $("#tooltip").remove();
+                            var x = item.datapoint[0].toFixed(2),
+                                y = item.datapoint[1].toFixed(2);
+
+                            showTooltip(item.pageX, item.pageY, item.series.label + " of " + x + " = " + y);
+                        }
+                    } else {
+                        $("#tooltip").remove();
+                        previousPoint = null;
+                    }
+                });
+            }
 
             function chart_passage(TDP) {
                 if ($('#chart_passage').size() != 1) {
@@ -155,7 +252,7 @@ var ChartsFlotcharts = function() {
                 function randValue() {
                     return (Math.floor(Math.random() * (1 + 40 - 20))) + 20;
                 }
-               
+
 
                 var plot = $.plot($("#chart_production"), [{
                     data: P,
@@ -438,6 +535,10 @@ var ChartsFlotcharts = function() {
                 });
             }
 
+            //Basic Chart
+
+
+
             //Tracking Curves
 
 
@@ -463,6 +564,8 @@ var ChartsFlotcharts = function() {
                 });
 
 
+
+
                 $.ajax({
                         type: 'POST',
                         url: '/temps_de_passage/',
@@ -484,7 +587,7 @@ var ChartsFlotcharts = function() {
                             //$("#loginError").text(xhr.responseJSON.error);
                         }
 
-                });        
+                });
 
 
                 $.ajax({
@@ -508,7 +611,29 @@ var ChartsFlotcharts = function() {
                             //$("#loginError").text(xhr.responseJSON.error);
                         }
 
-                });        
+                });
+                 $.ajax({
+                        type: 'POST',
+                        url: '/tatalstock_graph/',
+                        data: {
+                            'text': 'text',
+                            csrfmiddlewaretoken: String(document.cookie.split('csrftoken')).split("=")[1]
+                        },
+                        success: function (data) {
+
+                            if(data.TSTACK.length==0){
+                                data=[[1,],[2,],[3,],[4,],[5,],[6,],[7,],[8,],[9,],[10,]];
+                                tatalstock_graph(data);
+                            }else{
+                                tatalstock_graph(data.TSTACK);
+                            }
+
+                        },
+                        error: function (xhr, msg, err) {
+                            //$("#loginError").text(xhr.responseJSON.error);
+                        }
+
+                });
 
                  $.ajax({
                         type: 'POST',
@@ -608,6 +733,23 @@ var ChartsFlotcharts = function() {
                                 </div>
                             </div>
 
+                            <div class="portlet light portlet-fit bordered">
+                                <div class="portlet-title">
+                                    <div class="caption">
+                                       <!--  <i class="icon-settings font-dark"></i> -->
+                                        <span class="caption-subject font-dark sbold uppercase">Valeur de l'encours</span>
+                                    </div>
+                                    <div class="actions">
+
+                                    </div>
+                                </div>
+                                <div class="portlet-body">
+                                    <div id="tatalstock_graph" class="chart" > </div>
+
+
+                                </div>
+                            </div>
+
 
                              <div class="portlet light portlet-fit bordered">
                                 <div class="portlet-title">
@@ -625,6 +767,8 @@ var ChartsFlotcharts = function() {
 
                                 </div>
                             </div>
+
+
 
 
                         </div>

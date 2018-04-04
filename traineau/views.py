@@ -100,6 +100,7 @@ TDP=[]
 TDC=[]
 P=[]
 UI=[]
+TSTACK=[]
 TK=[[0,55], [1,55], [2,55], [3,55], [4,55], [5,55], [6,55], [7,55], [8,55], [9,55], [10,55], [11,55], [12,55], [13,55], [14,55], [15,55], [16,55],[17,55], [18,55], [19,55], [20,55], [21,55], [22,55], [23,55], [24,55], [25,55], [26,55], [27,55], [28,55], [29,55], [30,55] ]
 global gTime, pauseTime, resumeTime, diffTime
 
@@ -212,6 +213,7 @@ def get_initial_data(request):
     CNC = 0 
     TDC=[]
     TDP=[]
+    TSTACK = []
     batch_var=1
     P=[]
     UI=[]
@@ -315,12 +317,12 @@ def ProdL1(request):
     raw_dict['totalStack'] = int((StkL1+StkL2+StkL3+StkL4)*MPL)+ int(StkSKI2*MPSEAT) + int(StkSEAT*MPSKI)
     seconds=int((time.time() -gTime)- diffTime)
     minutes= round(seconds/60, 2)
-
+    tstack=[minutes,int((StkL1+StkL2+StkL3+StkL4)*MPL)+ int(StkSKI2*MPSEAT) + int(StkSEAT*MPSKI)]
     temp=[minutes, TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4)]
     TDP.append(temp);
     temp=[minutes, 55]
     TK.append(temp)
-
+    TSTACK.append(tstack)
     #StkL1 + StkL2 + StkL3 + SkrL4) x SleighCost + StkSki x Skicost + StkSeat x SeatCost
 
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
@@ -569,7 +571,8 @@ def fProdASS(request):
 
     seconds=(time.time() -gTime)- diffTime
     minutes= round(seconds/60, 2)
-
+    tstack = [minutes, int((StkL1 + StkL2 + StkL3 + StkL4) * MPL) + int(StkSKI2 * MPSEAT) + int(StkSEAT * MPSKI)]
+    TSTACK.append(tstack)
     temp=[minutes, TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4)]
     TDP.append(temp);
     temp=[minutes, REV2]
@@ -594,7 +597,8 @@ def fProdSKI1(request):
     raw_dict['SKI1TC'] = TCSKI1
     CSKI1 = TCSKI1*MOSKI1*C
     StkSKI1 = StkSKI1 + batch_var
-
+    seconds = (time.time() - gTime) - diffTime
+    minutes = round(seconds / 60, 2)
    
     raw_dict['CSKI1'] = CSKI1
     raw_dict['StkSKI1'] = StkSKI1
@@ -611,7 +615,8 @@ def fProdSKI1(request):
     raw_dict['MOSEAT'] = MOSEAT
     raw_dict['MOASS'] = MOASS
     raw_dict['totalStack'] = int((StkL1+StkL2+StkL3+StkL4)*MPL)+ int(StkSKI2*MPSEAT) + int(StkSEAT*MPSKI)
-
+    tstack = [minutes, int((StkL1 + StkL2 + StkL3 + StkL4) * MPL) + int(StkSKI2 * MPSEAT) + int(StkSEAT * MPSKI)]
+    TSTACK.append(tstack)
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
 def fProdSKI2(request):
@@ -621,6 +626,8 @@ def fProdSKI2(request):
     raw_dict = {}
     ProdSKI2 = ProdSKI2 + batch_var
     TCSKI2= int(((time.time() -gTime)-diffTime)/(ProdSKI2))
+    seconds = (time.time() - gTime) - diffTime
+    minutes = round(seconds / 60, 2)
     raw_dict['SKI2TC'] = TCSKI2
     raw_dict['ProdSKI2'] = ProdSKI2
     # SKI2TC.configure(text=(TCSKI2,"s."))
@@ -652,7 +659,8 @@ def fProdSKI2(request):
     raw_dict['MOSEAT'] = MOSEAT
     raw_dict['MOASS'] = MOASS
     raw_dict['totalStack'] = int((StkL1+StkL2+StkL3+StkL4)*MPL)+ int(StkSKI2*MPSEAT) + int(StkSEAT*MPSKI)
-
+    tstack = [minutes, int((StkL1 + StkL2 + StkL3 + StkL4) * MPL) + int(StkSKI2 * MPSEAT) + int(StkSEAT * MPSKI)]
+    TSTACK.append(tstack)
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
 def fProdSEAT(request):
@@ -662,6 +670,8 @@ def fProdSEAT(request):
     raw_dict = {}
     ProdSEAT = ProdSEAT + batch_var
     TCSEAT= int(((time.time() -gTime)-diffTime)/(ProdSEAT))
+    seconds = (time.time() - gTime) - diffTime
+    minutes = round(seconds / 60, 2)
     raw_dict['SEATTC'] = TCSEAT
     raw_dict['ProdSEAT'] = ProdSEAT
     CSEAT = TCSEAT*MOSEAT*C
@@ -686,7 +696,8 @@ def fProdSEAT(request):
     raw_dict['MOSEAT'] = MOSEAT
     raw_dict['MOASS'] = MOASS
     raw_dict['totalStack'] = int((StkL1+StkL2+StkL3+StkL4)*MPL)+ int(StkSKI2*MPSEAT) + int(StkSEAT*MPSKI)
-
+    tstack = [minutes, int((StkL1 + StkL2 + StkL3 + StkL4) * MPL) + int(StkSKI2 * MPSEAT) + int(StkSEAT * MPSKI)]
+    TSTACK.append(tstack)
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
 def NC1(request):
@@ -1088,4 +1099,9 @@ def unitIncome_graph(request):
     raw_dict['UI'] = UI
     print UI
 
-    return HttpResponse(json.dumps(raw_dict), content_type="application/json")        
+    return HttpResponse(json.dumps(raw_dict), content_type="application/json")
+
+def tatalstock_graph(request):
+    raw_dict = {}
+    raw_dict['TSTACK'] = TSTACK
+    return HttpResponse(json.dumps(raw_dict), content_type="application/json")

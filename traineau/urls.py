@@ -60,6 +60,7 @@ urlpatterns = [
     url(r'^temps_de_passage/$', views.temps_de_passage, name='temps_de_passage'),
     url(r'^production_graph/$', views.production_graph, name='production_graph'),
     url(r'^unitIncome_graph/$', views.unitIncome_graph, name='unitIncome_graph'),
+    url(r'^tatalstock_graph/$', views.tatalstock_graph, name='tatalstock_graph'),
 
 
     
