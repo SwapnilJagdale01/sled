@@ -206,6 +206,7 @@
 				operations(newPostKey);
 
                 $("#setting").prop('disabled', false);
+                $("#charts").prop('disabled', false);
                 
                 var x = 50;
                 var y = 0;
@@ -1593,7 +1594,7 @@
     <button class="btn btn-success" id="startTimer">Démarrer</button>
      <button class="btn btn-info" id="pauseTimer">Pause</button>
     <button class="btn btn-danger" id="stopTimer">Arrêt</button>
-    <a href='{% url 'charts' %}' target="blank"><button class="btn btn-warning" id="charts" style="margin-left: 64em;"> <i class="fa fa-bar-chart "></i></button></a>
+    <a href='{% url 'charts' %}' target="blank" ><button class="btn btn-warning" id="charts" style="margin-left: 64em;"> <i class="fa fa-bar-chart "></i></button></a>
 
     <a href='{% url 'setting' %}' target="blank"><button class="btn btn-warning" id="setting" style="margin-left: 76em;margin-top:-4em"> <i class="icon-settings font-white"></i></button></a>
     <br><br>
