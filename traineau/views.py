@@ -95,9 +95,10 @@ CA = 0 #total sales
 COUT = 0 #total cost
 CNC = 0 #cost of non-conformities
 
-#list variables
+# Graph list variables
 TDP=[]
 TDC=[]
+P=[]
 TK=[[0,55], [1,55], [2,55], [3,55], [4,55], [5,55], [6,55], [7,55], [8,55], [9,55], [10,55], [11,55], [12,55], [13,55], [14,55], [15,55], [16,55],[17,55], [18,55], [19,55], [20,55], [21,55], [22,55], [23,55], [24,55], [25,55], [26,55], [27,55], [28,55], [29,55], [30,55] ]
 global gTime, pauseTime, resumeTime, diffTime
 
@@ -191,7 +192,7 @@ def get_initial_data(request):
     MOSEAT = 1 
     MOASS = 2 
     #Raw material cost 
-    global MPL, MPSEAT, MPSKI, C, sale, REV2, CA, COUT, CNC, TDC, TDP, batch_var
+    global MPL, MPSEAT, MPSKI, C, sale, REV2, CA, COUT, CNC, TDC, TDP, batch_var, P
     MPL = 150 
     #sleigh 
     MPSEAT = 40 
@@ -211,6 +212,7 @@ def get_initial_data(request):
     TDC=[]
     TDP=[]
     batch_var=1
+    P=[]
     print "TDP", TDP
     #cost of non-conformities
     
@@ -280,6 +282,7 @@ def ProdL1(request):
     
 
     TCL1 = int(((time.time() -gTime)- diffTime)/(Prod1))
+
     print TCL1
     raw_dict['L1TC'] = TCL1
    
@@ -293,7 +296,7 @@ def ProdL1(request):
     temp=[m, TCL1]
     TDC.append(temp)
     print "TDC", TDC
-    
+   
     raw_dict['TP'] = (TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4),"s.")
     raw_dict['minStkL1'] = int(minStkL1)
     raw_dict['maxStkL1'] = int(maxStkL1)
@@ -397,6 +400,7 @@ def ProdL3(request):
     TDC.append(temp)
     print "TDC", TDC
 
+   
     StkL3 = StkL3 + batch_var #increase stock after WS3
     StkL2 = StkL2 - batch_var #reduces stock before WS3
 
@@ -455,6 +459,7 @@ def ProdL4(request):
     TDC.append(temp)
     print "TDC", TDC
 
+
     raw_dict['StkL4'] = StkL4
     raw_dict['StkL3'] = StkL3
 
@@ -488,11 +493,22 @@ def ProdL4(request):
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
 def fProdASS(request):
-    global StkASS, StkL4,ProdASS,CASS,CA,COUT,REV2, TCASS,StkSKI2,StkSEAT, diffTime,batch_var
+    global StkASS, StkL4,ProdASS,CASS,CA,COUT,REV2, TCASS,StkSKI2,StkSEAT, diffTime,batch_var, TCL1, TCL2, TCL3, TCL4
     raw_dict = {}
 
     #start()
+    # if Prod1:
+    #     TCL1= int(((time.time() -gTime)-diffTime)/(Prod1))
 
+    # if Prod2:
+    #     TCL2= int(((time.time() -gTime)-diffTime)/(Prod2))
+
+    # if Prod3:
+    #     TCL3= int(((time.time() -gTime)-diffTime)/(Prod3))
+
+    # if Prod4:    
+    #     TCL4= int(((time.time() -gTime)-diffTime)/(Prod4))
+    
     ProdASS = ProdASS + batch_var
     raw_dict['ASSProd'] = ProdASS
     TCASS= int(((time.time() -gTime)-diffTime)/(ProdASS)) # Cycle time of WS3 = actual Time / Qty produced at WS3
@@ -502,6 +518,9 @@ def fProdASS(request):
     temp=[m, TCASS]
     TDC.append(temp)
     print "TDC", TDC
+
+    temp=[m, ProdASS]
+    P.append(temp)
   
     raw_dict['TCASS'] = TCASS
     raw_dict['timestamp'] = TCASS
@@ -558,6 +577,7 @@ def fProdSKI1(request):
     CSKI1 = TCSKI1*MOSKI1*C
     StkSKI1 = StkSKI1 + batch_var
 
+   
     raw_dict['CSKI1'] = CSKI1
     raw_dict['StkSKI1'] = StkSKI1
 
@@ -586,6 +606,8 @@ def fProdSKI2(request):
     raw_dict['SKI2TC'] = TCSKI2
     raw_dict['ProdSKI2'] = ProdSKI2
     # SKI2TC.configure(text=(TCSKI2,"s."))
+
+   
     CSKI2 = TCSKI2*MOSKI2*C
     StkSKI2 = StkSKI2 + batch_var
     StkSKI1 = StkSKI1 - batch_var
@@ -627,6 +649,7 @@ def fProdSEAT(request):
     CSEAT = TCSEAT*MOSEAT*C
     StkSEAT = StkSEAT + batch_var
 
+  
     raw_dict['CSEAT'] = CSEAT
     raw_dict['StkSEAT'] = StkSEAT
 
@@ -1030,3 +1053,12 @@ def temps_de_passage(request):
     print TDP
 
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
+
+
+def production_graph(request):
+
+    raw_dict = {}
+    raw_dict['P'] = P
+    print P
+
+    return HttpResponse(json.dumps(raw_dict), content_type="application/json")    
