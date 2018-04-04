@@ -99,6 +99,7 @@ CNC = 0 #cost of non-conformities
 TDP=[]
 TDC=[]
 P=[]
+UI=[]
 TK=[[0,55], [1,55], [2,55], [3,55], [4,55], [5,55], [6,55], [7,55], [8,55], [9,55], [10,55], [11,55], [12,55], [13,55], [14,55], [15,55], [16,55],[17,55], [18,55], [19,55], [20,55], [21,55], [22,55], [23,55], [24,55], [25,55], [26,55], [27,55], [28,55], [29,55], [30,55] ]
 global gTime, pauseTime, resumeTime, diffTime
 
@@ -192,7 +193,7 @@ def get_initial_data(request):
     MOSEAT = 1 
     MOASS = 2 
     #Raw material cost 
-    global MPL, MPSEAT, MPSKI, C, sale, REV2, CA, COUT, CNC, TDC, TDP, batch_var, P
+    global MPL, MPSEAT, MPSKI, C, sale, REV2, CA, COUT, CNC, TDC, TDP, batch_var, P, UI, TK
     MPL = 150 
     #sleigh 
     MPSEAT = 40 
@@ -213,6 +214,8 @@ def get_initial_data(request):
     TDP=[]
     batch_var=1
     P=[]
+    UI=[]
+    TK=[]
     print "TDP", TDP
     #cost of non-conformities
     
@@ -315,7 +318,8 @@ def ProdL1(request):
 
     temp=[minutes, TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4)]
     TDP.append(temp);
-
+    temp=[minutes, 55]
+    TK.append(temp)
 
     #StkL1 + StkL2 + StkL3 + SkrL4) x SleighCost + StkSki x Skicost + StkSeat x SeatCost
 
@@ -375,6 +379,8 @@ def ProdL2(request):
 
     temp=[minutes, TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4)]
     TDP.append(temp);
+    temp=[minutes, 55]
+    TK.append(temp)
 
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
@@ -399,6 +405,8 @@ def ProdL3(request):
     temp=[m, TCL3]
     TDC.append(temp)
     print "TDC", TDC
+    temp=[minutes, 55]
+    TK.append(temp)
 
    
     StkL3 = StkL3 + batch_var #increase stock after WS3
@@ -433,6 +441,8 @@ def ProdL3(request):
 
     temp=[minutes, TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4)]
     TDP.append(temp);
+    temp=[minutes, 55]
+    TK.append(temp)
 
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
@@ -457,6 +467,8 @@ def ProdL4(request):
     m= round(m ,2)
     temp=[m, TCL4]
     TDC.append(temp)
+    temp=[minutes, 55]
+    TK.append(temp)
     print "TDC", TDC
 
 
@@ -489,6 +501,8 @@ def ProdL4(request):
 
     temp=[minutes, TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4)]
     TDP.append(temp);
+    temp=[minutes, 55]
+    TK.append(temp)
 
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
@@ -558,6 +572,10 @@ def fProdASS(request):
 
     temp=[minutes, TCL1+(TCL2*StkL1)+(TCL3*StkL2)+(TCL4*StkL3)+(TCASS*StkL4)]
     TDP.append(temp);
+    temp=[minutes, REV2]
+    UI.append(temp)
+    temp=[minutes, 55]
+    TK.append(temp)
 
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
 
@@ -1050,6 +1068,7 @@ def temps_de_passage(request):
 
     raw_dict = {}
     raw_dict['TDP'] = TDP
+    raw_dict['TK'] = TK
     print TDP
 
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")
@@ -1062,3 +1081,11 @@ def production_graph(request):
     print P
 
     return HttpResponse(json.dumps(raw_dict), content_type="application/json")    
+
+def unitIncome_graph(request):
+
+    raw_dict = {}
+    raw_dict['UI'] = UI
+    print UI
+
+    return HttpResponse(json.dumps(raw_dict), content_type="application/json")        
